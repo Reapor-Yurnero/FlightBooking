@@ -8,7 +8,7 @@ BDIR =.
 
 LIBS=-lm
 
-_DEPS = 
+_DEPS = def.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = client.o 
