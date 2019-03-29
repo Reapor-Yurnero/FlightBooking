@@ -6,9 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-
-#define PORT     7777
-#define MAXLINE 1024
+#include "def.h"
 
 // Driver code
 int main() {
@@ -27,7 +25,7 @@ int main() {
     memset(&cliaddr, 0, sizeof(cliaddr));
 
     // Filling server information
-    servaddr.sin_family = AF_INET;
+    servaddr.sin_family = AF_INET;  // IPv4
     servaddr.sin_port = htons(PORT);
     servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
