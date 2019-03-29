@@ -3,8 +3,8 @@ import sys  # for exit
 
 
 def udp_server():
-    HOST = 'localhost'  # Symbolic name meaning all available interfaces
-    PORT = 7777  # Arbitrary non-privileged port
+    HOST = 'localhost'
+    PORT = 7777
 
     # Datagram (udp) socket
     try:
