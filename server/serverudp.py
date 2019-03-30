@@ -38,6 +38,7 @@ def udp_server():
 
         s.sendto(bytes(reply, 'utf-8'), addr)
         print('Message[' + addr[0] + ':' + str(addr[1]) + '] - ' + data.strip())
+        # print(":".join("{:02x}".format(ord(c)) for c in data.strip()))
     s.close()
 
 

@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include "service.h"
 
-static int ipc_tx(struct requestor* rq, const char* msg){
+int ipc_tx(struct requestor* rq, const char* msg){
     
     sendto(rq->sockfd, (const char *)msg, strlen(msg),
            MSG_DONTROUTE, (const struct sockaddr *) rq->servaddr,
@@ -13,7 +14,7 @@ static int ipc_tx(struct requestor* rq, const char* msg){
     return 0;
 }
 
-static int ipc_rx(struct requestor* rq, char* recv){
+int ipc_rx(struct requestor* rq, char* recv){
     int n, len;
     n = recvfrom(rq->sockfd, (char *)recv, MAXLINE,
                  MSG_WAITALL, (struct sockaddr *) rq->servaddr,
@@ -23,11 +24,53 @@ static int ipc_rx(struct requestor* rq, char* recv){
     printf("Server : %s\n", recv);
 }
 
+char* ipc_cat(char* dest, const char* src){
+
+    int lend = strlen(dest);
+    int lens = strlen(src);
+    // printf("%d%d",lens,lend);
+    dest[lend] = (char) lens;
+    dest[lend+1] = '\0';
+
+    return strcat(dest, src);
+}
+
+int ipc_concat(int num, char* dest, ...){
+ 
+    va_list valist;
+    char* tmp;
+ 
+    va_start(valist, dest);
+ 
+    for (int i = 0; i < num; i++)
+    {
+       tmp = va_arg(valist, char*);
+       ipc_cat(dest,tmp);
+    }
+    
+    va_end(valist);
+ 
+    return 0;
+}
+
 static int base_s1(struct requestor* rq){
 
+    char msg[MAXLINE];
     char buffer[MAXLINE];
-    const char *hello = "\x01Hello from client";
-    ipc_tx(rq, hello);
+    char arg1[ARG_LENGTH];
+    char arg2[ARG_LENGTH];
+
+    memset(msg, 0, MAXLINE);
+    memset(buffer, 0, MAXLINE);
+
+    printf("Source city: ");
+    scanf("%s",arg1);
+    printf("Destination city: ");
+    scanf("%s",arg2);
+
+    ipc_concat(6,msg,"0",rq->name,"13","1",arg1,arg2);
+
+    ipc_tx(rq, msg);
     ipc_rx(rq, buffer);
     
     return 0;
