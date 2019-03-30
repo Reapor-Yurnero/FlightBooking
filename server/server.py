@@ -45,6 +45,9 @@ class server():
         except socket.error as msg:
             print('Bind failed. ' + msg)
             sys.exit()
+
+
+
         print('Socket bind successfully')
         return s
 
@@ -67,7 +70,13 @@ class server():
 
         while 1:
             # TODO: receive data from client (data, addr)
-            d = s.recvfrom(1024)
+            try:
+                d = s.recvfrom(1024)
+            except socket.timeout as e:
+                continue
+            except socket.error as msg:
+                print(msg)
+                sys.exit()
             bytedata = d[0]
             srcaddr = d[1]
             # data = str(d[0], 'utf-8')
@@ -157,7 +166,7 @@ class server():
         # arguments: string source, string destination
         # return: resultlist[0] = 0 means no result , positive value represents number of applicable flights found
         # following elements are the applicable flightNO
-        print("Service findFlight called by %s(%s)".format(tokens[1], tokens[2]))
+        print("Service findFlight called by {:s}({:s})".format(tokens[1], tokens[2]))
         source = tokens[4]
         destination = tokens[5]
         resultlist = [0]
@@ -172,7 +181,7 @@ class server():
     def checkdetails(self, tokens):
         # arguments: string flightNO
         # return: resultlist[0]: exist or not, if 1, resultlist[1:4] fills the details info requested, if 0, no exist
-        print("Service checkDetails called by %s(%s)".format(tokens[1], tokens[2]))
+        print("Service checkDetails called by {:s}({:s})".format(tokens[1], tokens[2]))
         flightID = tokens[4]
         resultlist = [0]
         if flightID in self.flightdb:
@@ -183,7 +192,7 @@ class server():
     def bookflight(self, tokens):
         # arguments: string flightNO, int quantity (>0)
         # return: resultlist[0]=1:succeeed, 0:failed because of not enough vacancy, -1:failed because of no such flight
-        print("Service bookFlight called by %s(%s)".format(tokens[1], tokens[2]))
+        print("Service bookFlight called by {:s}({:s})".format(tokens[1], tokens[2]))
         requestername = tokens[1]
         flightNO = tokens[4]
         requestedquantity = int(tokens[5])
@@ -208,7 +217,7 @@ class server():
     def monitorflight(self, tokens):
         # arguments: string FlightNO
         # return: returnlist[0]=1: approved; 0: no such flight. returnlist[1]
-        print("Service monitorFlight called by %s(%s)".format(tokens[1], tokens[2]))
+        print("Service monitorFlight called by {:s}({:s})".format(tokens[1], tokens[2]))
         flightNO = tokens[4]
         resultlist = [0]
         if flightNO in self.flightdb:
@@ -220,7 +229,7 @@ class server():
         # arguments: None
         # return resultlist[0]=0:no tickets ordered;pos num:total quantity of tickets ordered
         # resultlist[1:]: string flightNO, int quantity, string flightNO, int quantity, ...
-        print("Service checkOrder called by %s(%s)".format(tokens[1], tokens[2]))
+        print("Service checkOrder called by {:s}({:s})".format(tokens[1], tokens[2]))
         requestername = tokens[1]
         resultlist = [0]
         if requestername in self.bookingdb:
@@ -235,7 +244,7 @@ class server():
         # arguments: string flightNo, int quantity (>0)
         # return: resultlist[0]=1:succeeed, 0:failed because of no enought booked quantity,
         # -1:failed because of no such flight
-        print("Service cancelBooking called by %s(%s)".format(tokens[1], tokens[2]))
+        print("Service cancelBooking called by {:s}({:s})".format(tokens[1], tokens[2]))
         requestername = tokens[1]
         flightNO = tokens[4]
         cancelquantity = int(tokens[5])
@@ -275,26 +284,28 @@ class server():
                 cbbytecode = bytes(chr(len(str(2))) + str(2), 'utf-8')  # messageType = callback
                 # marshalling
                 cbbytecode += bytes(chr(len(cbmessage)) + cbmessage, 'utf-8')
-                try:
-                    s.sendto(cbbytecode, cbtarget[0])
-                    print("callback message sent by server")
-                    d = None
-                    while d is None:
-                        try:
-                            # try to receive reply from callback target
-                            d = s.recvfrom(1024)
-                            cbreplystring = str(d[0], 'utf-8')
-                            cbreplytokens = self.unmarshallstringedbytes(cbreplystring)
-                            if cbreplytokens[0] != '1':
-                                print("wrong callback reply messageType!")
-                                sys.exit()
-                            print("server receive callback reply from client:", end='')
-                            print(cbreplytokens)
-                        except socket.timeout as e:
-                            continue
-                except socket.error as msg:
-                    print(msg)
-                    sys.exit()
+                d = None
+                while d is None:
+                    try:
+                        s.settimeout(1)
+                        s.sendto(cbbytecode, cbtarget[0])
+                        print("callback message sent by server")
+                        # try to receive reply from callback target
+                        d = s.recvfrom(1024)
+                        cbreplystring = str(d[0], 'utf-8')
+                        cbreplytokens = self.unmarshallstringedbytes(cbreplystring)
+                        if cbreplytokens[0] != '1':
+                            print("wrong callback reply messageType!")
+                            sys.exit()
+                        print("server receive callback reply from client:", end='')
+                        print(cbreplytokens)
+                        break
+                    except socket.timeout as e:
+                        continue
+                    except socket.error as msg:
+                        print(msg)
+                        sys.exit()
+                s.settimeout(None)
 
 if __name__ == '__main__':
     aServer = server()
