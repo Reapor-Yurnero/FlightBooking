@@ -21,8 +21,17 @@ def udp_client():
     while (1):
         #msg = input('Enter message to send : ')
         #b = bytes(msg, 'utf-8')
-        b = bytes(chr(len(str(0))) + str(0) + chr(len('jordan')) + 'jordan' + chr(len(str(13))) + str(13) + chr(
-                len(str(1))) + str(1) + chr(len("Shanghai")) + "Shanghai" + chr(len("Beijing")) + "Beijing", 'utf-8')
+        # test sevice one
+        # b = bytes(chr(len(str(0))) + str(0) + chr(len('jordan')) + 'jordan' + chr(len(str(13))) + str(13) + chr(
+        #        len(str(1))) + str(1) + chr(len("Guangzhou")) + "Guangzhou" + chr(len("Beijing")) + "Beijing", 'utf-8')
+
+        # test service two
+        # b = bytes(chr(len(str(0))) + str(0) + chr(len('jordan')) + 'jordan' + chr(len(str(13))) + str(13) + chr(
+        #         len(str(2))) + str(2) + chr(len("HU301")) + "HU301", 'utf-8')
+
+        # test service three
+        b = bytes(chr(len(str(0))) + str(0) + chr(len('Jordan')) + 'Jordan' + chr(len(str(13))) + str(13) + chr(
+            len(str(3))) + str(3) + chr(len("HU201")) + "HU201" + chr(len(str(5))) + str(5), 'utf-8')
         try:
             # Set the whole string
             s.sendto(b, (host, port))

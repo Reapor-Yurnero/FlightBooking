@@ -137,29 +137,56 @@ class server():
 
         return byteresult
 
-
     def findflight(self, tokens):
         # arguments: string source, string destination
-        # return: string FlightID or string "No flight found"
+        # return: resultlist[0] = 0 means no result , positive value represents number of applicable flights found
+        # following elements are the applicable flightNO
         print("findFlight called")
         source = tokens[4]
         destination = tokens[5]
-        result = [0]  # result[0] = 0 means no result , positive value represents number of applicable flights found
+        resultlist = [0]
 
         for flightID in self.flightdb:
-            if self.flightdb[flightID]["src"] == source or self.flightdb[flightID]["dest"] == destination:
+            if self.flightdb[flightID]["src"] == source and self.flightdb[flightID]["dest"] == destination:
                 print(flightID)
-                result[0] += 1
-                result.append(flightID)
-        return result
+                resultlist[0] += 1
+                resultlist.append(flightID)
+        return resultlist
 
     def checkdetails(self, tokens):
+        # arguments: string flightNO
+        # return: resultlist[0]: exist or not, if 1, resultlist[1:4] fills the details info requested, if 0, no exist
         print("checkDetails called")
-        return ""
+        flightID = tokens[4]
+        resultlist = [0]
+        if flightID in self.flightdb:
+            resultlist[0] = 1
+            resultlist += self.flightdb[flightID]["details"]
+        return resultlist
 
     def bookflight(self, tokens):
+        # arguments: string flightNO, int quantity
+        # return: resultlist[0]=1:succeeed, 0:failed because of not enough vacancy, -1:failed because of no such flight
         print("bookFlight called")
-        return ""
+        requestername = tokens[1]
+        flightNO = tokens[4]
+        requestedquantity = int(tokens[5])
+        resultlist = [-1]
+        if flightNO in self.flightdb and self.flightdb[flightNO]["details"][2] >= requestedquantity:
+            resultlist[0] = 1
+            self.flightdb[flightNO]["details"][2] -= requestedquantity
+            if requestername in self.bookingdb:
+                self.bookingdb[requestername][flightNO] = self.bookingdb[requestername][flightNO] + requestedquantity \
+                    if flightNO in self.bookingdb[requestername] else requestedquantity
+            else:
+                self.bookingdb[requestername] = {}
+                self.bookingdb[requestername][flightNO] =requestedquantity
+
+        elif flightNO in self.flightdb and self.flightdb[flightNO]["details"][2] < requestedquantity:
+            resultlist[0] = 0
+        print(self.flightdb)
+        print(self.bookingdb)
+        return resultlist
 
     def monitorflight(self, tokens):
         print("monitorFlight called")
