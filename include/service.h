@@ -1,7 +1,6 @@
 #ifndef __SERVICE_H
 #define __SERVICE_H
 
-#include <netinet/in.h>
 #include "def.h"
 #include "requestor.h"
 
@@ -12,7 +11,7 @@ struct serv_ops {
         all of them should be returned to the user. If no flight matches the source and
         destination places, an error message should be returned.
     */
-    int (*s1)(int fd, struct sockaddr_in* to);
+    int (*s1)(struct requestor* rq);
 
     /*  A service that allows a user to query the departure time, airfare and seat
         availability by specifying the flight identifier. If the flight with the requested identifier
@@ -59,10 +58,7 @@ struct serv_ops {
 
 struct serv {
 
-    int sockfd;
-    struct sockaddr_in* servaddr;
-    struct sockaddr_in* cliaddr;
-
+    /* we may handle concurrency in service system, keep this structure */
     const struct serv_ops* ops;
 
 };
