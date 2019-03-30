@@ -23,6 +23,9 @@ class server():
         # callback list
         self.callbacklist = []
 
+        # a boolean to record modification on db for current loop
+        self.dbmodified = False
+
     def initsocket(self):
         HOST = 'localhost'
         PORT = 7777
@@ -127,6 +130,10 @@ class server():
 
             # TODO: Callback callbacklist and clean clients expired monitor duration from list
 
+
+            # restore dbmodified flag
+            self.dbmodified = False
+
     def marshallresult(self, resultlist):
         # prepare header
         byteresult = bytes(chr(len(str(1)))+str(1), 'utf-8') # messageType = reply
@@ -165,7 +172,7 @@ class server():
         return resultlist
 
     def bookflight(self, tokens):
-        # arguments: string flightNO, int quantity
+        # arguments: string flightNO, int quantity (>0)
         # return: resultlist[0]=1:succeeed, 0:failed because of not enough vacancy, -1:failed because of no such flight
         print("bookFlight called")
         requestername = tokens[1]
@@ -174,6 +181,7 @@ class server():
         resultlist = [-1]
         if flightNO in self.flightdb and self.flightdb[flightNO]["details"][2] >= requestedquantity:
             resultlist[0] = 1
+            self.dbmodified = True  # set the flag correspondingly
             self.flightdb[flightNO]["details"][2] -= requestedquantity
             if requestername in self.bookingdb:
                 self.bookingdb[requestername][flightNO] = self.bookingdb[requestername][flightNO] + requestedquantity \
@@ -207,10 +215,35 @@ class server():
 
         return resultlist
 
-    def cancelbooking(self, token):
+    def cancelbooking(self, tokens):
+        # arguments: string flightNo, int quantity (>0)
+        # return: resultlist[0]=1:succeeed, 0:failed because of no enought booked quantity,
+        # -1:failed because of no such flight
         print("cancelBooking called")
-        return ""
+        requestername = tokens[1]
+        flightNO = tokens[4]
+        cancelquantity = int(tokens[5])
+        resultlist = [-1]
+        if flightNO in self.flightdb and self.checkuserquantity(requestername,flightNO) >= cancelquantity:
+            resultlist[0] = 1
+            self.dbmodified = True  # set the flag correspondingly
+            self.flightdb[flightNO]["details"][2] += cancelquantity
+            self.bookingdb[requestername][flightNO] -= cancelquantity
+            if self.bookingdb[requestername][flightNO] == 0:
+                self.bookingdb[requestername].pop(flightNO)
+        elif flightNO in self.flightdb:
+            resultlist[0] = 0
 
+        return resultlist
+
+    # helper function for cancelbooking
+    # arguments: string username, string flightNO
+    # return: int quantity of the flightNO ticket booked by username (>=0)
+    def checkuserquantity(self, user, flightNO):
+        quantity = 0
+        if user in self.bookingdb and flightNO in self.bookingdb[user]:
+            quantity = self.bookingdb[user][flightNO]
+        return quantity
 
 if __name__ == '__main__':
     aServer = server()

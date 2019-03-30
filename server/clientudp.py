@@ -31,9 +31,18 @@ def udp_client():
     blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Jordan')) + 'Jordan' + chr(len(str(13))) + str(13) + chr(
         len(str(3))) + str(3) + chr(len("HU201")) + "HU201" + chr(len(str(5))) + str(5), 'utf-8'))
 
-    # test service four
+    # test service five
     blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Jordan')) + 'Jordan' + chr(len(str(14))) + str(14) + chr(
         len(str(5))) + str(5), 'utf-8'))
+
+    # test service six
+    blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Jordan')) + 'Jordan' + chr(len(str(15))) + str(15) + chr(
+        len(str(6))) + str(6) + chr(len("HU201")) + "HU201" + chr(len(str(3))) + str(3), 'utf-8'))
+
+    # test service five
+    blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Jordan')) + 'Jordan' + chr(len(str(16))) + str(16) + chr(
+        len(str(5))) + str(5), 'utf-8'))
+
     for b in blist:
         #msg = input('Enter message to send : ')
         #b = bytes(msg, 'utf-8')
