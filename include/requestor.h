@@ -2,15 +2,19 @@
 #define __REQUESTOR_H
 
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include "def.h"
 
 #define MAX_REQUESTOR_NAME 30
 
 struct requestor {
     char* name;
-    int port;
-    char* ip;
     int id;
+
+    int sockfd;
+    struct sockaddr_in* servaddr;
+    struct sockaddr_in* cliaddr;
+
     spin_lock_t lock;
 };
 
