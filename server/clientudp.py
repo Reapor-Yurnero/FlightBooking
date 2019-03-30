@@ -55,7 +55,7 @@ def udp_client():
         len(str(6))) + str(6) + chr(len("HU201")) + "HU201" + chr(len(str(3))) + str(3), 'utf-8'))
 
     # test service five
-    blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Jordan')) + 'Jordan' + chr(len(str(18))) + str(18) + chr(
+    blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Kobe')) + 'Kobe' + chr(len(str(18))) + str(18) + chr(
         len(str(5))) + str(5), 'utf-8'))
 
 

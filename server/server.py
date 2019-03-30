@@ -2,7 +2,8 @@ import socket  # for sockets
 import sys  # for exit
 import time # for duration
 
-class server():
+
+class Server:
 
     def __init__(self):
 
@@ -45,8 +46,6 @@ class server():
         except socket.error as msg:
             print('Bind failed. ' + msg)
             sys.exit()
-
-
 
         print('Socket bind successfully')
         return s
@@ -115,12 +114,12 @@ class server():
 
             resultlist = \
                 {
-                '1': self.findflight,
-                '2': self.checkdetails,
-                '3': self.bookflight,
-                '4': self.monitorflight,
-                '5': self.checkorder,
-                '6': self.cancelbooking,
+                    '1': self.findflight,
+                    '2': self.checkdetails,
+                    '3': self.bookflight,
+                    '4': self.monitorflight,
+                    '5': self.checkorder,
+                    '6': self.cancelbooking,
                 }[requestedService](tokens)
 
             print(resultlist)
@@ -154,7 +153,7 @@ class server():
 
     def marshallresult(self, resultlist):
         # prepare header
-        byteresult = bytes(chr(len(str(1)))+str(1), 'utf-8') # messageType = reply
+        byteresult = bytes(chr(len(str(1)))+str(1), 'utf-8')  # messageType = reply
         # append results
         for result in resultlist:
             byteresult += bytes(chr(len(result))+result if type(result) is str else chr(len(str(result)))+str(result),
@@ -206,7 +205,7 @@ class server():
                     if flightNO in self.bookingdb[requestername] else requestedquantity
             else:
                 self.bookingdb[requestername] = {}
-                self.bookingdb[requestername][flightNO] =requestedquantity
+                self.bookingdb[requestername][flightNO] = requestedquantity
 
         elif flightNO in self.flightdb and self.flightdb[flightNO]["details"][2] < requestedquantity:
             resultlist[0] = 0
@@ -215,7 +214,7 @@ class server():
         return resultlist
 
     def monitorflight(self, tokens):
-        # arguments: string FlightNO
+        # arguments: string FlightNO, int duration (not used in this function)
         # return: returnlist[0]=1: approved; 0: no such flight. returnlist[1]
         print("Service monitorFlight called by {:s}({:s})".format(tokens[1], tokens[2]))
         flightNO = tokens[4]
@@ -249,7 +248,7 @@ class server():
         flightNO = tokens[4]
         cancelquantity = int(tokens[5])
         resultlist = [-1]
-        if flightNO in self.flightdb and self.checkuserquantity(requestername,flightNO) >= cancelquantity:
+        if flightNO in self.flightdb and self.checkuserquantity(requestername, flightNO) >= cancelquantity:
             resultlist[0] = 1
             self.flightdb[flightNO]["modified"] = True  # set the flag correspondingly
             self.flightdb[flightNO]["details"][2] += cancelquantity
@@ -259,6 +258,8 @@ class server():
         elif flightNO in self.flightdb:
             resultlist[0] = 0
 
+        print(self.flightdb)
+        print(self.bookingdb)
         return resultlist
 
     # helper function for cancelbooking
@@ -307,6 +308,7 @@ class server():
                         sys.exit()
                 s.settimeout(None)
 
+
 if __name__ == '__main__':
-    aServer = server()
+    aServer = Server()
     aServer.start()

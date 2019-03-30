@@ -11,14 +11,16 @@ def udp_server():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print('Socket created')
     except socket.error as msg:
-        print('Failed to create socket. ' + msg)
+        print('Failed to create socket. ')
+        print(msg)
         sys.exit()
 
     # Bind socket to local host and port
     try:
         s.bind((HOST, PORT))
     except socket.error as msg:
-        print('Bind failed. ' + msg)
+        print('Bind failed. ')
+        print(msg)
         sys.exit()
     print('Socket bind complete')
 
