@@ -1,2 +1,11 @@
-#define PORT    7777
-#define MAXLINE 1024
+#ifndef __DEF_H
+#define __DEF_H
+
+#define DEF_SERVER_PORT     7777
+#define DEF_CLIENT_PORT     8080
+#define MAXLINE         1024
+#define IP_LENGTH       16
+
+#define spin_lock_t int 
+
+#endif /* __DEF_H */
