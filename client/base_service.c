@@ -52,7 +52,12 @@ int init_service(struct serv* s){
     s->servaddr->sin_port = htons(DEF_SERVER_PORT);
     s->servaddr->sin_addr.s_addr = inet_addr("127.0.0.1");
 
-    /* Bind the socket with the server address */
+    /* set to default */
+    s->cliaddr->sin_family = AF_INET;
+    s->cliaddr->sin_port = htons(DEF_CLIENT_PORT);
+    s->cliaddr->sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    /* Bind the socket with the client address */
     if ( bind(s->sockfd, (const struct sockaddr *)s->cliaddr,
               sizeof(struct sockaddr) ) < 0 )
     {
@@ -61,11 +66,6 @@ int init_service(struct serv* s){
         free(s->cliaddr);
         return -EHOSTUNREACH;
     }
-
-    /* set to default */
-    s->cliaddr->sin_family = AF_INET;
-    s->cliaddr->sin_port = htons(DEF_CLIENT_PORT);
-    s->cliaddr->sin_addr.s_addr = inet_addr("127.0.0.1");
 
     return 0;
 }
