@@ -1,6 +1,10 @@
 #ifndef __SERVICE_H
 #define __SERVICE_H
 
+#include <netinet/in.h>
+#include "def.h"
+#include "requestor.h"
+
 struct serv_ops {
 
     /*  A service that allows a user to query the flight identifier(s) by specifying the source
@@ -8,13 +12,13 @@ struct serv_ops {
         all of them should be returned to the user. If no flight matches the source and
         destination places, an error message should be returned.
     */
-    int (*s1)();
+    int (*s1)(int fd, struct sockaddr_in* to);
 
     /*  A service that allows a user to query the departure time, airfare and seat
         availability by specifying the flight identifier. If the flight with the requested identifier
         does not exist, an error message should be returned.
     */
-    int (*s2)();
+    int (*s2)(struct requestor* rq);
 
     /*  A service that allows a user to make seat reservation on a flight by specifying the
     flight identifier and the number of seats to reserve. On successful reservation, an
@@ -23,7 +27,7 @@ struct serv_ops {
     flight identifier or insufficient number of available seats), a proper error message
     should be returned.
     */
-    int (*s3)();
+    int (*s3)(struct requestor* rq);
 
     /*  A service that allows a user to monitor updates made to the seat availability
     information of a flight at the server through callback for a designated time period
@@ -41,16 +45,31 @@ struct serv_ops {
     client. However, your implementation should allow multiple clients to monitor
     updates to the flights concurrently.
     */
-    int (*s4)();
+    int (*s4)(struct requestor* rq);
 
     /*  In addition to the above services, you are required design and implement two
     more operations on the flights through client-server communication. One of
     them should be idempotent and the other should be non-idempotent. Describe
     your design in the report.
     */
-    int (*s5)();
-    int (*s6)();
+    int (*s5)(struct requestor* rq);
+    int (*s6)(struct requestor* rq);
 
 };
+
+struct serv {
+
+    int sockfd;
+    struct sockaddr_in* servaddr;
+    struct sockaddr_in* cliaddr;
+
+    const struct serv_ops* ops;
+
+};
+
+extern int init_service(struct serv* s);
+extern int remove_service(struct serv* s);
+
+extern const struct serv_ops base_serv_ops;
 
 #endif /* __SERVICE_H */

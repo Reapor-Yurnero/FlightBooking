@@ -1,59 +1,25 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include "def.h"
+#include "service.h"
+#include "requestor.h"
 
 // Driver code
+struct requestor rq1;
+
+struct serv ser = {
+    .ops = &base_serv_ops,
+};
+
 int main() {
-    int sockfd;
-    char buffer[MAXLINE];
-    char *hello = "Hello from client";
-    struct sockaddr_in     servaddr, cliaddr;
 
-    // Creating socket file descriptor
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
-        perror("socket creation failed");
-        exit(EXIT_FAILURE);
-    }
+    init_service(&ser);
+    init_requestor(&rq1,"test1",8088,"localhost");
 
-    memset(&servaddr, 0, sizeof(servaddr));
-    memset(&cliaddr, 0, sizeof(cliaddr));
+    // printf("",ser.ops);
+    ser.ops->s1(ser.sockfd, ser.servaddr);
 
-    // Filling server information
-    servaddr.sin_family = AF_INET;  // IPv4
-    servaddr.sin_port = htons(PORT);
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    free_requestor(&rq1);
+    remove_service(&ser);
 
-    cliaddr.sin_family = AF_INET;
-    cliaddr.sin_port = htons(8080);
-    cliaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-    // Bind the socket with the server address
-    if ( bind(sockfd, (const struct sockaddr *)&cliaddr,
-              sizeof(cliaddr)) < 0 )
-    {
-        perror("bind failed");
-        exit(EXIT_FAILURE);
-    }
-
-    int n, len;
-
-    sendto(sockfd, (const char *)hello, strlen(hello),
-           MSG_DONTROUTE, (const struct sockaddr *) &servaddr,
-           sizeof(servaddr));
-    printf("Hello message sent.\n");
-
-    n = recvfrom(sockfd, (char *)buffer, MAXLINE,
-                 MSG_WAITALL, (struct sockaddr *) &servaddr,
-                 &len);
-    buffer[n] = '\0';
-    printf("Server : %s\n", buffer);
-
-    close(sockfd);
     return 0;
 }
