@@ -192,9 +192,20 @@ class server():
         print("monitorFlight called")
         return ""
 
-    def checkorder(self, token):
+    def checkorder(self, tokens):
+        # arguments: None
+        # return resultlist[0]=0:no tickets ordered;pos num:total quantity of tickets ordered
+        # resultlist[1:]: string flightNO, int quantity, string flightNO, int quantity, ...
         print("checkOrder called")
-        return ""
+        requestername = tokens[1]
+        resultlist = [0]
+        if requestername in self.bookingdb:
+            for item in self.bookingdb[requestername].items():
+                resultlist.append(item[0])
+                resultlist.append(item[1])
+                resultlist[0] += item[1]
+
+        return resultlist
 
     def cancelbooking(self, token):
         print("cancelBooking called")
