@@ -19,8 +19,10 @@ def udp_client():
     host = 'localhost';
     port = 7777;
     while (1):
-        msg = input('Enter message to send : ')
-        b = bytes(msg, 'utf-8')
+        #msg = input('Enter message to send : ')
+        #b = bytes(msg, 'utf-8')
+        b = bytes(chr(len(str(0))) + str(0) + chr(len('jordan')) + 'jordan' + chr(len(str(13))) + str(13) + chr(
+                len(str(1))) + str(1) + chr(len("Shanghai")) + "Shanghai" + chr(len("Beijing")) + "Beijing", 'utf-8')
         try:
             # Set the whole string
             s.sendto(b, (host, port))
@@ -30,7 +32,17 @@ def udp_client():
             reply = str(d[0], 'utf-8')
             addr = d[1]
 
-            print('Server reply : ' + reply)
+            print('Server reply byte code: ')
+            print(d[0])
+            print('string: ' + reply)
+            idx = 0
+            tokens = []
+            while idx != len(reply):
+                length = ord(reply[idx])
+                tokens.append(reply[idx+1:idx+length+1])
+                idx = idx+length+1
+            print(tokens)
+            break
 
         except socket.error as msg:
             print(msg)
