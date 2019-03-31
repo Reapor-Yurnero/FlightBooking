@@ -9,10 +9,11 @@ class Client():
         self.socketPort = port
         self.username = ""
         self.requestID = 0
+        self.socket = None
 
     def start(self):
         # TODO: setup socket
-        s = self.initsocket()
+        self.socket = self.initsocket()
 
         # TODO: read username from user and start up the interface main loop
         self.username = input("Type in your name: ")
@@ -36,9 +37,12 @@ class Client():
             byteargs = self.marshallarguments(requestedservice, arglist)
 
             # TODO: send bytecode to server socket and receive result bytecode from server and unmarshall into tokens
-            self.sendbyteargsandreceive(s, byteargs)
+            tokens = self.sendbyteargsandreceive(self.socket, byteargs)
 
             # TODO: dispatch tokens to each service and generate corresponding output/do monitor
+            self.decodeandexecute(tokens, requestedservice)
+
+            input("Press Return to go back to main menu...")
 
     def initsocket(self):
         # Datagram (udp) socket
@@ -126,7 +130,7 @@ class Client():
 
     def marshallarguments(self, requestedtype, arglist):
         # prepare message header
-        self.requestID += 1
+        self.requestID = time.time()
         byteargs = bytes(chr(len(str(0)))+str(0), 'utf-8')  # messageType = request
         byteargs += bytes(chr(len(self.username)) + self.username, 'utf-8')  # requesterName
         byteargs += bytes(chr(len(str(self.requestID))) + str(self.requestID), 'utf-8')  # requestID
@@ -144,7 +148,6 @@ class Client():
             s.settimeout(1)
             try:
                 s.sendto(byteargs, SERVERADDR)
-
                 d = s.recvfrom(1024)
                 resultstring = str(d[0], 'utf-8')
                 resulttokens = self.unmarshallresultstringedbytes(resultstring)
@@ -167,6 +170,67 @@ class Client():
             idx = idx + length + 1
         tokens = tuple(tokens)  # make tokens readonly
         return tokens
+
+    def decodeandexecute(self, tokens, servicetype):
+        if tokens[0] == '1':  # reply message
+            if servicetype == 1:
+                print("There is(are) {:d} flight(s) applicable:".format(int(tokens[1])) if int(tokens[1]) > 0
+                      else "There is no flight applicable")
+                for flight in tokens[2:]:
+                    print(flight)
+            if servicetype == 2:
+                print("No such flight!" if tokens[1] == '0'
+                      else "Flight will depart at {:02d}:{:02d}, with airfare {:s} and {:s} vancancies"
+                      .format(int(tokens[2]) // 100, int(tokens[2]) % 100, tokens[3], tokens[4]))
+            if servicetype == 3:
+                print(
+                    {'1': "Booked successfully!",
+                     '0': "Not enough vacancy!",
+                     '-1': "No such flight!"}[tokens[1]]
+                )
+            if servicetype == 4:
+                print("Monitor blocked! No such flight" if tokens[1] == '0' else "Start monitoring...")
+                # call monitor
+                if tokens[1] == '1':
+                    self.monitor(int(tokens[2]))
+            if servicetype == 5:
+                print("You have booked {:d} flight ticket(s) in all:".format(int(tokens[1])))
+                for idx in range(1, 1 + (len(tokens)-2)//2):
+                    print("Flight: {:s}, Quantity: {:d}".format(tokens[idx*2], int(tokens[2*idx+1])))
+            if servicetype == 6:
+                print(
+                    {'1': "Canceled successfully!",
+                     '0': "You haven't booked that many tickets!",
+                     '-1': "No such flight!"}[tokens[1]]
+                )
+
+    def monitor(self, duration):
+        start_time = time.time()
+        while time.time() <= start_time + duration + 1:
+            try:
+                self.socket.settimeout(1)
+                d = self.socket.recvfrom(1024)
+                reply = str(d[0], 'utf-8')
+
+                print('Server callback message byte code: ', end='')
+                print(d[0])
+                print('Stringed byte code: ' + reply)
+                tokens = self.unmarshallresultstringedbytes(reply)
+                self.paresecbmsg(tokens)
+                b = bytes(chr(len(str(1))) + str(1) + chr(len('Callback received')) + 'Callback received', 'utf-8')
+                self.socket.sendto(b, SERVERADDR)
+                print("callback reply sent by client")
+            except socket.timeout as e:
+                continue
+        self.socket.settimeout(None)
+        print("monitor interval ends")
+
+    def paresecbmsg(self, tokens):
+        if tokens[0] != '2':
+            print("Wrong messageType!")
+            sys.exit()
+        else:
+            print(tokens[1])
 
 if __name__ == '__main__':
     aClient = Client()

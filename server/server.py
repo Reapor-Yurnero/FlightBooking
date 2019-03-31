@@ -215,12 +215,13 @@ class Server:
 
     def monitorflight(self, tokens):
         # arguments: string FlightNO, int duration (not used in this function)
-        # return: returnlist[0]=1: approved; 0: no such flight. returnlist[1]
+        # return: returnlist[0]=1: approved; 0: no such flight. returnlist[1]=duration
         print("Service monitorFlight called by {:s}({:s})".format(tokens[1], tokens[2]))
         flightNO = tokens[4]
         resultlist = [0]
         if flightNO in self.flightdb:
             resultlist[0] = 1
+            resultlist.append(int(tokens[5]))
 
         return resultlist
 

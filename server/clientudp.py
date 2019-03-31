@@ -22,7 +22,7 @@ def udp_client():
         sys.exit()
 
     try:
-        s.bind(('127.0.0.1', 8888))
+        s.bind(('127.0.0.1', 9999))
     except socket.error as msg:
         print('Bind failed. ' + msg)
         sys.exit()
