@@ -102,6 +102,7 @@ class Server:
                 continue
             elif messageType != '0':
                 print("wrong message type!")
+                print(tokens)
                 sys.exit(0)
             requesterName = tokens[1]
             requestID = tokens[2]
@@ -313,22 +314,25 @@ class Server:
                 # marshalling
                 cbbytecode += bytes(chr(len(cbmessage)) + cbmessage, 'utf-8')
                 d = None
-                while d is None:
+                while 1:
                     try:
                         s.settimeout(1)
                         s.sendto(cbbytecode, cbtarget[0])
                         print("Callback message sent by server: \"{:s}\"".format(cbmessage))
                         # try to receive reply from callback target
-                        d = s.recvfrom(1024)
-                        cbreplystring = str(d[0], 'utf-8')
-                        cbreplytokens = self.unmarshallstringedbytes(cbreplystring)
-                        if cbreplytokens[0] == '3':
-                            # acknowledge from other client come
-                            self.request_ack(cbreplytokens)
-                            continue
-                        if cbreplytokens[0] != '1':
-                            print("wrong callback reply messageType!")
-                            sys.exit()
+                        while 1:
+                            d = s.recvfrom(1024)
+                            cbreplystring = str(d[0], 'utf-8')
+                            cbreplytokens = self.unmarshallstringedbytes(cbreplystring)
+                            if cbreplytokens[0] == '3':
+                                # acknowledge from other client come
+                                self.request_ack(cbreplytokens)
+                                continue
+                            if cbreplytokens[0] != '1':
+                                print("wrong callback reply messageType!")
+                                print(cbreplytokens)
+                                sys.exit()
+                            break
                         print("Server receive callback reply from client:", end='')
                         print(cbreplytokens)
                         break

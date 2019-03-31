@@ -122,7 +122,7 @@ class Client:
                 duration = input("How long do you want to monitor? [10, 120] second: ")
                 try:
                     duration = int(duration)
-                    if duration <= 10 or duration >= 120:
+                    if duration <= 10 or duration > 300:
                         raise ValueError
                     arglist.append(duration)
                     inputvalid = True
@@ -251,7 +251,8 @@ class Client:
                 # print('Stringed byte code: ' + reply)
                 tokens = self.unmarshallresultstringedbytes(reply)
                 self.paresecbmsg(tokens)
-                b = bytes(chr(len(str(1))) + str(1) + chr(len('Callback received')) + 'Callback received', 'utf-8')
+                cbreplymsg = 'Callback received by {:s}'.format(self.username)
+                b = bytes(chr(len(str(1))) + str(1) + chr(len(cbreplymsg)) + cbreplymsg, 'utf-8')
                 self.socket.sendto(b, SERVERADDR)
                 print("callback reply sent by client")
             except socket.timeout as e:
