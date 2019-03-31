@@ -12,11 +12,23 @@ struct serv ser = {
 
 int main() {
 
+    int sn=1;
+
     init_service(&ser);
     init_requestor(&rq1,"test1",8088,"127.0.0.1");
 
-    // printf("",ser.ops);
-    ser.ops->s1(&rq1);
+    while(1){
+        printf("Welcome %s! Select a service:\n",rq1.name);
+        printf("1. Find applicable flights from source to destination.\n");
+        printf("2. Get detailed information of a flight: departure time, airfare and vacancies.\n");
+        printf("3. Book a flight.\n");
+        printf("4. Monitor a flight.\n");
+        printf("5. Check order information.\n");
+        printf("6. Cancel ordered tickets\n");
+        printf("Type in the service you want (number 1-7): ");
+        scanf("%d", &sn);
+        ser.call_service(sn,&rq1);
+    }
 
     free_requestor(&rq1);
     remove_service(&ser);
