@@ -4,6 +4,14 @@
 #include "def.h"
 #include "requestor.h"
 
+#define SER_FIND        1
+#define SER_GETDETAIL   2
+#define SER_BOOK        3
+#define SER_MONITOR     4
+#define SER_ORDERINFO   5
+#define SER_CANCEL      6
+#define SER_EXIT        7
+
 struct serv_ops {
 
     /*  A service that allows a user to query the flight identifier(s) by specifying the source
@@ -58,6 +66,7 @@ struct serv_ops {
 
 struct serv {
 
+    int (*call_service)(int sn, struct requestor* rq);
     /* we may handle concurrency in service system, keep this structure */
     const struct serv_ops* ops;
 
