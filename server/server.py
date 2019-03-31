@@ -1,6 +1,6 @@
 import socket  # for sockets
 import sys  # for exit
-import time # for duration
+import time  # for duration
 
 
 class Server:
@@ -10,9 +10,9 @@ class Server:
         # flightdb: Dic[flightID] -> details: departuretime, airfare, availibity, src, dest
         self.flightdb = \
             {
-                "MU110": {"details": [1800, 1000, 10], "src": "Shanghai", "dest": "Beijing", "modified": False},
-                "HU201": {"details": [1405, 600, 16], "src": "Singapore", "dest": "Bali", "modified": False},
-                "MU5125": {"details": [930, 211, 52], "src": "Shanghai", "dest": "Beijing", "modified": False}
+                "MU110": {"details": [1800, 1000.3, 10], "src": "Shanghai", "dest": "Beijing", "modified": False},
+                "HU201": {"details": [1405, 600.2, 16], "src": "Singapore", "dest": "Bali", "modified": False},
+                "MU5125": {"details": [930, 211.1, 52], "src": "Shanghai", "dest": "Beijing", "modified": False}
             }
 
         # bookingdb: Dic[Name][flightID] -> quantity of flightID booked by Name
@@ -37,14 +37,16 @@ class Server:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             print('Socket created')
         except socket.error as msg:
-            print('Failed to create socket. ' + msg)
+            print('Failed to create socket. ')
+            print(msg)
             sys.exit()
 
         # Bind socket to local host and port
         try:
             s.bind((HOST, PORT))
         except socket.error as msg:
-            print('Bind failed. ' + msg)
+            print('Bind failed. ')
+            print(msg)
             sys.exit()
 
         print('Socket bind successfully')
@@ -68,6 +70,10 @@ class Server:
         # start the main loop
 
         while 1:
+            # reset modified flag
+            for flight in self.flightdb.items():
+                flight[1]["modified"] = False
+
             # TODO: receive data from client (data, addr)
             try:
                 d = s.recvfrom(1024)
@@ -125,23 +131,28 @@ class Server:
                     '6': self.cancelbooking,
                 }[requestedService](tokens)
 
-            print(resultlist)
+            # print(resultlist)
 
             # TODO: marshall result into byte result
             byteresult = self.marshallresult(resultlist)
-            print(byteresult)
+            # print(byteresult)
 
             # TODO: add request info and result into history
             self.requesthistory[(requesterName, requestID)] = byteresult
+            print("New request and result are added into request history: ", end="")
             print(self.requesthistory)
 
             # TODO: reply bytes to request sender
             try:
                 s.sendto(byteresult, srcaddr)
-                print("reply sent by server")
+                print("Reply sent by server: ", end="")
+                print(byteresult)
             except socket.error as msg:
                 print(msg)
                 sys.exit()
+
+            # TODO: receive acknowledgement from client
+
 
             # TODO: Callback callbacklist and clean clients with expired monitor duration from list
             self.callback(s)
@@ -149,11 +160,8 @@ class Server:
             # TODO: Add Client with necessary info to callbacklist if requested monitoring
             if requestedService == '4' and resultlist[0] == 1:
                 self.callbacklist.append([srcaddr, tokens[4], time.time()+int(tokens[5])])
+                print("Callback list updated: ", end='')
                 print(self.callbacklist)
-
-            # reset modified flag
-            for flight in self.flightdb.items():
-                flight[1]["modified"] = False
 
     def marshallresult(self, resultlist):
         # prepare header
@@ -169,9 +177,9 @@ class Server:
         # arguments: string source, string destination
         # return: resultlist[0] = 0 means no result , positive value represents number of applicable flights found
         # following elements are the applicable flightNO
-        print("Service findFlight called by {:s}({:s})".format(tokens[1], tokens[2]))
         source = tokens[4]
         destination = tokens[5]
+        print("Service findFlight({:s}, {:s}) called by ({:s}, {:s})".format(source, destination, tokens[1], tokens[2]))
         resultlist = [0]
 
         for flightID in self.flightdb:
@@ -184,9 +192,10 @@ class Server:
     def checkdetails(self, tokens):
         # arguments: string flightNO
         # return: resultlist[0]: exist or not, if 1, resultlist[1:4] fills the details info requested, if 0, no exist
-        print("Service checkDetails called by {:s}({:s})".format(tokens[1], tokens[2]))
         flightID = tokens[4]
         resultlist = [0]
+        print("Service checkDetails({:s}) called by {:s}({:s})".format(flightID, tokens[1], tokens[2]))
+
         if flightID in self.flightdb:
             resultlist[0] = 1
             resultlist += self.flightdb[flightID]["details"]
@@ -195,10 +204,11 @@ class Server:
     def bookflight(self, tokens):
         # arguments: string flightNO, int quantity (>0)
         # return: resultlist[0]=1:succeeed, 0:failed because of not enough vacancy, -1:failed because of no such flight
-        print("Service bookFlight called by {:s}({:s})".format(tokens[1], tokens[2]))
         requestername = tokens[1]
         flightNO = tokens[4]
         requestedquantity = int(tokens[5])
+        print("Service bookFlight({:s}, {:d}) called by {:s}({:s})"
+              .format(flightNO, requestedquantity, tokens[1], tokens[2]))
         resultlist = [-1]
         if flightNO in self.flightdb and self.flightdb[flightNO]["details"][2] >= requestedquantity:
             resultlist[0] = 1
@@ -218,11 +228,11 @@ class Server:
         return resultlist
 
     def monitorflight(self, tokens):
-        # arguments: string FlightNO, int duration (not used in this function)
+        # arguments: string FlightNO, int duration
         # return: returnlist[0]=1: approved; 0: no such flight. returnlist[1]=duration
-        print("Service monitorFlight called by {:s}({:s})".format(tokens[1], tokens[2]))
         flightNO = tokens[4]
         resultlist = [0]
+        print("Service monitorFlight({:s}, {:s}) called by {:s}({:s})".format(flightNO, tokens[5], tokens[1], tokens[2]))
         if flightNO in self.flightdb:
             resultlist[0] = 1
             resultlist.append(int(tokens[5]))
@@ -248,10 +258,11 @@ class Server:
         # arguments: string flightNo, int quantity (>0)
         # return: resultlist[0]=1:succeeed, 0:failed because of no enought booked quantity,
         # -1:failed because of no such flight
-        print("Service cancelBooking called by {:s}({:s})".format(tokens[1], tokens[2]))
         requestername = tokens[1]
         flightNO = tokens[4]
         cancelquantity = int(tokens[5])
+        print("Service cancelBooking({:s}, {:d}) called by {:s}({:s})"
+              .format(flightNO, cancelquantity, tokens[1], tokens[2]))
         resultlist = [-1]
         if flightNO in self.flightdb and self.checkuserquantity(requestername, flightNO) >= cancelquantity:
             resultlist[0] = 1
@@ -272,6 +283,7 @@ class Server:
         # return: None
         if (tokens[1], tokens[2]) in self.requesthistory:
             del self.requesthistory[(tokens[1], tokens[2])]
+            print("Acknowledgement ({:s},{:s}) received, clear from the history: ".format(tokens[1], tokens[2]), end="")
             print(self.requesthistory)
         else:
             print("Acknowledgement's corresponding request ({:s},{:s}) does not exist!".format(tokens[1], tokens[2]))
@@ -290,7 +302,7 @@ class Server:
         for cbtarget in self.callbacklist:
             if cbtarget[2] < time.time():
                 self.callbacklist.remove(cbtarget)
-                print("callbacklist updated: ", end='')
+                print("Callback list updated: ", end='')
                 print(self.callbacklist)
             elif self.flightdb[cbtarget[1]]["modified"]:
                 # construct string message
@@ -305,15 +317,19 @@ class Server:
                     try:
                         s.settimeout(1)
                         s.sendto(cbbytecode, cbtarget[0])
-                        print("callback message sent by server")
+                        print("Callback message sent by server: \"{:s}\"".format(cbmessage))
                         # try to receive reply from callback target
                         d = s.recvfrom(1024)
                         cbreplystring = str(d[0], 'utf-8')
                         cbreplytokens = self.unmarshallstringedbytes(cbreplystring)
+                        if cbreplytokens[0] == '3':
+                            # acknowledge from other client come
+                            self.request_ack(cbreplytokens)
+                            continue
                         if cbreplytokens[0] != '1':
                             print("wrong callback reply messageType!")
                             sys.exit()
-                        print("server receive callback reply from client:", end='')
+                        print("Server receive callback reply from client:", end='')
                         print(cbreplytokens)
                         break
                     except socket.timeout as e:

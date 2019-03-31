@@ -1,11 +1,11 @@
 import socket  # for sockets
 import sys  # for exit
-import time # for duration
+import time  # for duration
 
 SERVERADDR = ('localhost', 7777)  # modify this when necessary
 
 
-class Client():
+class Client:
     def __init__(self):
         self.socketPort = 8888
         while 1:
@@ -153,7 +153,7 @@ class Client():
             print("Input Error: Please type in an integer from 1 to 7")
             time.sleep(1)
 
-        print(arglist)
+        # print(arglist)
         return arglist
 
     def marshallarguments(self, requestedtype, arglist, messageType=0):
@@ -167,7 +167,8 @@ class Client():
         # append arguments
         for arg in arglist:
             byteargs += bytes(chr(len(arg))+arg if type(arg) is str else chr(len(str(arg)))+str(arg), 'utf-8')
-        print(byteargs)
+
+        # print(byteargs)
         return byteargs
 
     def sendbyteargsandreceive(self, s, byteargs):
@@ -189,9 +190,9 @@ class Client():
         # send acknowledgement
         ack = self.marshallarguments(0, [], 3)
         s.sendto(ack, SERVERADDR)
-
         s.settimeout(None)
-        print(resulttokens)
+
+        # print(resulttokens)
         return resulttokens
 
     def unmarshallresultstringedbytes(self, data):
@@ -213,7 +214,7 @@ class Client():
                     print(flight)
             if servicetype == 2:
                 print("No such flight!" if tokens[1] == '0'
-                      else "Flight will depart at {:02d}:{:02d}, with airfare {:s} and {:s} vancancies"
+                      else "Flight will depart at {:02d}:{:02d}, with airfare ${:s} and {:s} vacancies"
                       .format(int(tokens[2]) // 100, int(tokens[2]) % 100, tokens[3], tokens[4]))
             if servicetype == 3:
                 print(
@@ -245,9 +246,9 @@ class Client():
                 d = self.socket.recvfrom(1024)
                 reply = str(d[0], 'utf-8')
 
-                print('Server callback message byte code: ', end='')
-                print(d[0])
-                print('Stringed byte code: ' + reply)
+                # print('Server callback message byte code: ', end='')
+                # print(d[0])
+                # print('Stringed byte code: ' + reply)
                 tokens = self.unmarshallresultstringedbytes(reply)
                 self.paresecbmsg(tokens)
                 b = bytes(chr(len(str(1))) + str(1) + chr(len('Callback received')) + 'Callback received', 'utf-8')
@@ -255,6 +256,9 @@ class Client():
                 print("callback reply sent by client")
             except socket.timeout as e:
                 continue
+            except socket.error as msg:
+                print(msg)
+                sys.exit()
         self.socket.settimeout(None)
         print("monitor interval ends")
 
@@ -264,6 +268,7 @@ class Client():
             sys.exit()
         else:
             print(tokens[1])
+
 
 if __name__ == '__main__':
     aClient = Client()
