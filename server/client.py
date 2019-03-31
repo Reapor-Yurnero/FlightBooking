@@ -4,6 +4,7 @@ import time # for duration
 
 SERVERADDR = ('localhost', 7777)  # modify this when necessary
 
+
 class Client():
     def __init__(self):
         self.socketPort = 8888
@@ -155,10 +156,11 @@ class Client():
         print(arglist)
         return arglist
 
-    def marshallarguments(self, requestedtype, arglist):
+    def marshallarguments(self, requestedtype, arglist, messageType=0):
         # prepare message header
-        self.requestID = time.time()
-        byteargs = bytes(chr(len(str(0)))+str(0), 'utf-8')  # messageType = request
+        if messageType == 0:
+            self.requestID = time.time()  # don't update requestID if it's an ack
+        byteargs = bytes(chr(len(str(messageType)))+str(messageType), 'utf-8')  # messageType = request (0) by default
         byteargs += bytes(chr(len(self.username)) + self.username, 'utf-8')  # requesterName
         byteargs += bytes(chr(len(str(self.requestID))) + str(self.requestID), 'utf-8')  # requestID
         byteargs += bytes(chr(len(str(requestedtype))) + str(requestedtype), 'utf-8')  # requestedtype
@@ -184,6 +186,10 @@ class Client():
             except socket.error as msg:
                 print(msg)
                 sys.exit()
+        # send acknowledgement
+        ack = self.marshallarguments(0, [], 3)
+        s.sendto(ack, SERVERADDR)
+
         s.settimeout(None)
         print(resulttokens)
         return resulttokens

@@ -91,7 +91,10 @@ class Server:
             tokens = self.unmarshallstringedbytes(data)
             # note that tokens is a string list, all elements are string literal
             messageType = tokens[0]
-            if messageType != '0':
+            if messageType == '3':
+                self.request_ack(tokens)
+                continue
+            elif messageType != '0':
                 print("wrong message type!")
                 sys.exit(0)
             requesterName = tokens[1]
@@ -130,6 +133,7 @@ class Server:
 
             # TODO: add request info and result into history
             self.requesthistory[(requesterName, requestID)] = byteresult
+            print(self.requesthistory)
 
             # TODO: reply bytes to request sender
             try:
@@ -263,6 +267,16 @@ class Server:
         print(self.bookingdb)
         return resultlist
 
+    def request_ack(self, tokens):
+        # arguments: None
+        # return: None
+        if (tokens[1], tokens[2]) in self.requesthistory:
+            del self.requesthistory[(tokens[1], tokens[2])]
+            print(self.requesthistory)
+        else:
+            print("Acknowledgement's corresponding request ({:s},{:s}) does not exist!".format(tokens[1], tokens[2]))
+            sys.exit()
+
     # helper function for cancelbooking
     # arguments: string username, string flightNO
     # return: int quantity of the flightNO ticket booked by username (>=0)
@@ -281,7 +295,7 @@ class Server:
             elif self.flightdb[cbtarget[1]]["modified"]:
                 # construct string message
                 cbmessage = "Flight " + cbtarget[1] + " now has " \
-                            + str(self.flightdb[cbtarget[1]]["details"][2]) + " vancancies"
+                            + str(self.flightdb[cbtarget[1]]["details"][2]) + " vacancies!"
                 # prepare header for bytecode
                 cbbytecode = bytes(chr(len(str(2))) + str(2), 'utf-8')  # messageType = callback
                 # marshalling
