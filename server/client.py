@@ -5,8 +5,18 @@ import time # for duration
 SERVERADDR = ('localhost', 7777)  # modify this when necessary
 
 class Client():
-    def __init__(self, port=8888):
-        self.socketPort = port
+    def __init__(self):
+        self.socketPort = 8888
+        while 1:
+            self.socketPort = input("Port: ")
+            try:
+                self.socketPort = int(self.socketPort)
+                if self.socketPort < 2000 or self.socketPort > 65536:
+                    raise ValueError
+                break
+            except ValueError:
+                print("Input Error: please type in a positive integer from 2000 to 65536!")
+                continue
         self.username = ""
         self.requestID = 0
         self.socket = None
@@ -16,19 +26,16 @@ class Client():
         self.socket = self.initsocket()
 
         # TODO: read username from user and start up the interface main loop
-        self.username = input("Type in your name: ")
+        while 1:
+            self.username = input("Type in your name: ")
+            if self.username == '':
+                print("Input Error: your name should not be empty!")
+            else:
+                break
 
         while 1:
             # TODO: interface to let users choose service
-            print("Welcome {:s}! Select a service:".format(self.username))
-            print("1. Find applicable flights from source to destination.")
-            print("2. Get detailed information of a flight: departure time, airfare and vacancies.")
-            print("3. Book a flight.")
-            print("4. Monitor a flight.")
-            print("5. Check order information.")
-            print("6. Cancel ordered tickets")
-            print("7. Exit")
-            requestedservice = int(input("Type in the service you want (number 1-7): "))
+            requestedservice = self.serviceinterface()
 
             # TODO: collect arguments from interface
             arglist = self.getarguments(requestedservice)
@@ -43,6 +50,26 @@ class Client():
             self.decodeandexecute(tokens, requestedservice)
 
             input("Press Return to go back to main menu...")
+
+    def serviceinterface(self):
+        print("Welcome {:s}! Select a service:".format(self.username))
+        print("1. Find applicable flights from source to destination.")
+        print("2. Get detailed information of a flight: departure time, airfare and vacancies.")
+        print("3. Book a flight.")
+        print("4. Monitor a flight.")
+        print("5. Check order information.")
+        print("6. Cancel ordered tickets")
+        print("7. Exit")
+        while 1:
+            service = input("Type in the service you want (number 1-7): ")
+            try:
+                service = int(service)
+                if service < 0 or service > 7:
+                    raise ValueError
+                return service
+            except ValueError:
+                print("Input Error: please type in a positive integer from 1 to 7!")
+                continue
 
     def initsocket(self):
         # Datagram (udp) socket
@@ -189,7 +216,7 @@ class Client():
                      '-1': "No such flight!"}[tokens[1]]
                 )
             if servicetype == 4:
-                print("Monitor blocked! No such flight" if tokens[1] == '0' else "Start monitoring...")
+                print("Monitor rejected: no such flight!" if tokens[1] == '0' else "Start monitoring...")
                 # call monitor
                 if tokens[1] == '1':
                     self.monitor(int(tokens[2]))
