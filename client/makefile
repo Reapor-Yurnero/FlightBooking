@@ -8,10 +8,10 @@ BDIR =.
 
 LIBS=-lm
 
-_DEPS = def.h requestor.h service.h
+_DEPS = def.h requestor.h service.h ipc.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = requestor.o base_service.o client.o 
+_OBJ = requestor.o base_service.o client.o ipc.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 _EXE = client.exe
