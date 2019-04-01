@@ -2,7 +2,7 @@ import socket  # for sockets
 import sys  # for exit
 import time  # for duration
 
-HOST = 'localhost'
+HOST = ''
 PORT = 7777
 
 

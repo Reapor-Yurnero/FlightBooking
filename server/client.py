@@ -2,7 +2,7 @@ import socket  # for sockets
 import sys  # for exit
 import time  # for duration
 
-SERVERADDR = ('localhost', 7777)  # modify this when necessary
+SERVERADDR = ('localhost', 7777)  # modify this when necessary, currently applicable to local test
 
 
 class Client:
@@ -82,9 +82,9 @@ class Client:
             print(msg)
             sys.exit()
 
-        # Bind socket to local host and port
+        # Bind socket to any interface applicable and port
         try:
-            s.bind(('localhost', self.socketPort))
+            s.bind(('', self.socketPort))
         except socket.error as msg:
             print('Bind failed. ')
             print(msg)
