@@ -2,6 +2,8 @@ import socket  # for sockets
 import sys  # for exit
 import time  # for duration
 
+HOST = 'localhost'
+PORT = 7777
 
 class Server:
 
@@ -28,40 +30,6 @@ class Server:
         # a boolean to record modification on db for current loop
         # self.dbmodified = False
 
-    def initsocket(self):
-        HOST = 'localhost'
-        PORT = 7777
-
-        # Datagram (udp) socket
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            print('Socket created')
-        except socket.error as msg:
-            print('Failed to create socket. ')
-            print(msg)
-            sys.exit()
-
-        # Bind socket to local host and port
-        try:
-            s.bind((HOST, PORT))
-        except socket.error as msg:
-            print('Bind failed. ')
-            print(msg)
-            sys.exit()
-
-        print('Socket bind successfully')
-        return s
-
-    def unmarshallstringedbytes(self, data):
-        idx = 0
-        tokens = []
-        while idx != len(data):
-            length = ord(data[idx])
-            tokens.append(data[idx + 1:idx + length + 1])
-            idx = idx + length + 1
-        tokens = tuple(tokens)  # make tokens readonly
-        return tokens
-
     def start(self):
         # initialize the socket
 
@@ -70,7 +38,7 @@ class Server:
         # start the main loop
 
         while 1:
-            # reset modified flag
+            # TODO: reset modified flag
             for flight in self.flightdb.items():
                 flight[1]["modified"] = False
 
@@ -163,6 +131,38 @@ class Server:
                 self.callbacklist.append([srcaddr, tokens[4], time.time()+int(tokens[5])])
                 print("Callback list updated: ", end='')
                 print(self.callbacklist)
+
+    def initsocket(self):
+
+        # Datagram (udp) socket
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            print('Socket created')
+        except socket.error as msg:
+            print('Failed to create socket. ')
+            print(msg)
+            sys.exit()
+
+        # Bind socket to local host and port
+        try:
+            s.bind((HOST, PORT))
+        except socket.error as msg:
+            print('Bind failed. ')
+            print(msg)
+            sys.exit()
+
+        print('Socket bind successfully')
+        return s
+
+    def unmarshallstringedbytes(self, data):
+        idx = 0
+        tokens = []
+        while idx != len(data):
+            length = ord(data[idx])
+            tokens.append(data[idx + 1:idx + length + 1])
+            idx = idx + length + 1
+        tokens = tuple(tokens)  # make tokens readonly
+        return tokens
 
     def marshallresult(self, resultlist):
         # prepare header

@@ -185,6 +185,7 @@ class Client:
             except socket.timeout as e:
                 continue
             except socket.error as msg:
+                print("Error happens when trying to send message: ", end="")
                 print(msg)
                 sys.exit()
         # send acknowledgement
@@ -272,5 +273,9 @@ class Client:
 
 
 if __name__ == '__main__':
+    if len(sys.argv) == 3:
+        SERVERADDR = (sys.argv[1], int(sys.argv[2]))
+        print(SERVERADDR)
     aClient = Client()
     aClient.start()
+

@@ -43,8 +43,8 @@ def udp_client():
         len(str(3))) + str(3) + chr(len("HU201")) + "HU201" + chr(len(str(5))) + str(5), 'utf-8'))
 
     # test service three
-    blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('James')) + 'James' + chr(len(str(13))) + str(13) + chr(
-        len(str(3))) + str(3) + chr(len("HU201")) + "HU201" + chr(len(str(5))) + str(5), 'utf-8'))
+    blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Kobe')) + 'Kobe' + chr(len(str(13))) + str(13) + chr(
+        len(str(3))) + str(3) + chr(len("MU110")) + "MU110" + chr(len(str(5))) + str(5), 'utf-8'))
 
     # test service five
     blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('James')) + 'James' + chr(len(str(14))) + str(14) + chr(
@@ -53,6 +53,10 @@ def udp_client():
     # test service six
     blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('James')) + 'James' + chr(len(str(15))) + str(15) + chr(
         len(str(6))) + str(6) + chr(len("HU201")) + "HU201" + chr(len(str(3))) + str(3), 'utf-8'))
+
+    # test service six
+    blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Kobe')) + 'Kobe' + chr(len(str(15))) + str(15) + chr(
+        len(str(6))) + str(6) + chr(len("MU110")) + "MU110" + chr(len(str(1))) + str(1), 'utf-8'))
 
     # test service five
     blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('Kobe')) + 'Kobe' + chr(len(str(18))) + str(18) + chr(
