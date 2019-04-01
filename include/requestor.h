@@ -9,7 +9,7 @@
 
 struct requestor {
     char* name;
-    int id;
+    char id[10];
 
     int sockfd;
     struct sockaddr_in* servaddr;
@@ -17,6 +17,8 @@ struct requestor {
 
     spin_lock_t lock;
 };
+
+extern char* id_plus(struct requestor* rq, int num);
 
 extern int init_requestor(struct requestor *rq, const char* name,
                     int port, const char* ip);

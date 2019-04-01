@@ -10,6 +10,7 @@ static int base_s1(struct requestor* rq){
     char buffer[MAXLINE];
     char arg1[ARG_LENGTH];
     char arg2[ARG_LENGTH];
+    char* tokens[MAX_TOKEN];
 
     memset(msg, 0, MAXLINE);
     memset(buffer, 0, MAXLINE);
@@ -19,11 +20,20 @@ static int base_s1(struct requestor* rq){
     printf("Destination city: ");
     scanf("%s",arg2);
 
-    ipc_concat(6,msg,"0",rq->name,"13","1",arg1,arg2);
+    ipc_concat(6,msg,"0",rq->name,id_plus(rq,1),"1",arg1,arg2);
 
     ipc_tx(rq, msg);
     ipc_rx(rq, buffer);
-    
+
+    int num = ipc_disperse(tokens,buffer);
+    if( num > 2 ){
+        printf("There is(are) %d flight(s) applicable:\n",num-2);
+        for(int i=2; i<num; i++)printf("%s\n",tokens[i]);
+    }
+    else{
+        printf("There is no flight applicable\n");
+    }
+
     return 0;
 }
 
@@ -31,6 +41,7 @@ static int base_s2(struct requestor* rq){
     char msg[MAXLINE];
     char buffer[MAXLINE];
     char arg1[ARG_LENGTH];
+    char* tokens[MAX_TOKEN];
 
     memset(msg, 0, MAXLINE);
     memset(buffer, 0, MAXLINE);
@@ -38,10 +49,20 @@ static int base_s2(struct requestor* rq){
     printf("Flight number you want to enquire: ");
     scanf("%s",arg1);
 
-    ipc_concat(5,msg,"0",rq->name,"12","2",arg1);
+    ipc_concat(5,msg,"0",rq->name,id_plus(rq,1),"2",arg1);
 
     ipc_tx(rq, msg);
     ipc_rx(rq, buffer);
+
+    int ntime = atoi(tokens[2]);
+    if(*tokens[1]=='0'){
+        printf("No such flight!\n"); 
+    }
+    else{
+        printf("Flight will depart at %d:%d, \
+            with airfare %s and %s vacancies",
+            ntime/100,ntime%100,tokens[3],tokens[4]);
+    }
     
     return 0;
 }
@@ -51,6 +72,7 @@ static int base_s3(struct requestor* rq){
     char buffer[MAXLINE];
     char arg1[ARG_LENGTH];
     char arg2[ARG_LENGTH];
+    char* tokens[MAX_TOKEN];
 
     memset(msg, 0, MAXLINE);
     memset(buffer, 0, MAXLINE);
@@ -61,10 +83,12 @@ static int base_s3(struct requestor* rq){
     /* need check here */
     scanf("%s",arg2);
 
-    ipc_concat(6,msg,"0",rq->name,"11","3",arg1,arg2);
+    ipc_concat(6,msg,"0",rq->name,id_plus(rq,1),"3",arg1,arg2);
 
     ipc_tx(rq, msg);
     ipc_rx(rq, buffer);
+
+
     
     return 0;
 }
@@ -75,6 +99,7 @@ static int base_s4(struct requestor* rq){
     char buffer[MAXLINE];
     char arg1[ARG_LENGTH];
     char arg2[ARG_LENGTH];
+    char* tokens[MAX_TOKEN];
 
     memset(msg, 0, MAXLINE);
     memset(buffer, 0, MAXLINE);
@@ -85,7 +110,7 @@ static int base_s4(struct requestor* rq){
     /* need check here */
     scanf("%s",arg2);
 
-    ipc_concat(6,msg,"0",rq->name,"10","4",arg1,arg2);
+    ipc_concat(6,msg,"0",rq->name,id_plus(rq,1),"4",arg1,arg2);
 
     ipc_tx(rq, msg);
     ipc_rx(rq, buffer);
@@ -97,13 +122,14 @@ static int base_s4(struct requestor* rq){
 static int base_s5(struct requestor* rq){
     char msg[MAXLINE];
     char buffer[MAXLINE];
+    char* tokens[MAX_TOKEN];
 
     memset(msg, 0, MAXLINE);
     memset(buffer, 0, MAXLINE);
 
     printf("wait a second, proceeding...");
 
-    ipc_concat(4,msg,"0",rq->name,"9","5");
+    ipc_concat(4,msg,"0",rq->name,id_plus(rq,1),"5");
 
     ipc_tx(rq, msg);
     ipc_rx(rq, buffer);
@@ -117,6 +143,7 @@ static int base_s6(struct requestor* rq){
     char buffer[MAXLINE];
     char arg1[ARG_LENGTH];
     char arg2[ARG_LENGTH];
+    char* tokens[MAX_TOKEN];
 
     memset(msg, 0, MAXLINE);
     memset(buffer, 0, MAXLINE);
@@ -127,7 +154,7 @@ static int base_s6(struct requestor* rq){
     /* need check here */
     scanf("%s",arg2);
 
-    ipc_concat(6,msg,"0",rq->name,"12","6",arg1,arg2);
+    ipc_concat(6,msg,"0",rq->name,id_plus(rq,1),"6",arg1,arg2);
 
     ipc_tx(rq, msg);
     ipc_rx(rq, buffer);

@@ -5,5 +5,6 @@ extern int ipc_tx(struct requestor* rq, const char* msg);
 extern int ipc_rx(struct requestor* rq, char* recv);
 extern char* ipc_cat(char* dest, const char* src);
 extern int ipc_concat(int num, char* dest, ...);
+extern int ipc_disperse(char** tokens,char* buffer);
 
 #endif /* __IPC_H */
