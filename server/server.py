@@ -5,9 +5,10 @@ import time  # for duration
 HOST = 'localhost'
 PORT = 7777
 
+
 class Server:
 
-    def __init__(self):
+    def __init__(self, reliableudp=True):
 
         # flightdb: Dic[flightID] -> details: departuretime, airfare, availibity, src, dest
         self.flightdb = \
@@ -27,8 +28,8 @@ class Server:
         # callback list
         self.callbacklist = []
 
-        # a boolean to record modification on db for current loop
-        # self.dbmodified = False
+        # switch for reliable udp (filter duplicated request + no re-execute)
+        self.reliableudp = reliableudp
 
     def start(self):
         # initialize the socket
@@ -79,7 +80,7 @@ class Server:
             #
             # TODO: filter the request and bypass the execution if result already stored
             #
-            if (requesterName, requestID) in self.requesthistory:
+            if self.reliableudp and (requesterName, requestID) in self.requesthistory:
 
                 # TODO: reply bytes to request sender
                 s.sendto(self.requesthistory[(requesterName, requestID)], srcaddr)
@@ -345,5 +346,9 @@ class Server:
 
 
 if __name__ == '__main__':
-    aServer = Server()
+    if len(sys.argv) == 2 and sys.argv[1] == 'False':
+        aServer = Server(False)
+        print("Manually chose udp reliability: {:s}".format(sys.argv[1]))
+    else:
+        aServer = Server()
     aServer.start()
