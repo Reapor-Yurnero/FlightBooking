@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "service.h"
+#include "ipc.h"
 
 static int base_s1(struct requestor* rq){
 
@@ -145,7 +146,7 @@ const struct serv_ops base_serv_ops = {
 
 static int base_call(int sn, struct requestor* rq){
 
-    struct serv_ops* ops = &base_serv_ops;
+    const struct serv_ops* ops = &base_serv_ops;
 
     switch (sn)
     {
