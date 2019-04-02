@@ -1,5 +1,24 @@
 # FlightBooking
 
+Author: Xiaohan Fu
+Demo: slot 10, 13:15 - 13:30
+
+## Overall Stucture Design
+
+The flightbooking system is implemented in a client-server structure. 
+
+THe client app is responsible for the interaction with users, including reading the requested service, corresponding arguments and outputing the consequent result.
+
+The server is responsible for the execution of services, management of database and supply of the result.
+
+Our whole system is illustrated in the following graph (TODO).
+
+### Database Structure
+
+The database is actually a runtime dictionray stored as a private dictionary inside the server. It's designed to be super intuitive: the Key of the dict is just the idenntifier of the flightNO, the correponding Value is another dict which contains all information relevant. "Details" is a three element array which is repectively the departure time (int), airfare (float) and vacancy (int). The departure hour:minute data can be decoded by dividing the int value with 100 and obtain its quotient and remainder. The airfare and vacancy are straightforward.
+
+Example:
+
 ## Marshalling
 
 client request byte code format:
@@ -186,7 +205,7 @@ bookingdb = \
     }
 ```
 
-### Conclusions
+### Experiment Conclusions
 
 The at-most-once semantics works properly for both non-idempotent and idempotent operations on duplicated request,
  while at-least-once only works properly for idempotent operations and will lead to wrong answer on non-idempotent case.
