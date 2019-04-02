@@ -9,7 +9,7 @@ class Client:
     def __init__(self):
         self.socketPort = 8888
         while 1:
-            self.socketPort = input("Port: ")
+            self.socketPort = input("Port you want to use on this machine: ")
             try:
                 self.socketPort = int(self.socketPort)
                 if self.socketPort < 2000 or self.socketPort > 65536:
@@ -255,7 +255,7 @@ class Client:
                 cbreplymsg = 'Callback received by {:s}'.format(self.username)
                 b = bytes(chr(len(str(1))) + str(1) + chr(len(cbreplymsg)) + cbreplymsg, 'utf-8')
                 self.socket.sendto(b, SERVERADDR)
-                print("callback reply sent by client")
+                # print("callback reply sent by client")
             except socket.timeout as e:
                 continue
             except socket.error as msg:
@@ -275,7 +275,7 @@ class Client:
 if __name__ == '__main__':
     if len(sys.argv) == 3:
         SERVERADDR = (sys.argv[1], int(sys.argv[2]))
-        print(SERVERADDR)
+        # print(SERVERADDR)
     aClient = Client()
     aClient.start()
 
