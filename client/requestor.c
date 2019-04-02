@@ -9,6 +9,12 @@
 #include <errno.h>
 #include "requestor.h"
 
+char* id_plus(struct requestor* rq, int num){
+    int id = atoi(rq->id)+num;
+    sprintf(rq->id, "%d", id);
+    return rq->id;
+}
+
 int init_requestor(struct requestor *rq, const char* name,
                     int port, const char* ip){
 
@@ -48,7 +54,8 @@ int init_requestor(struct requestor *rq, const char* name,
         return -EHOSTUNREACH;
     }
 
-    rq->id = 0;
+    memset(rq->id, 0, MAX_INT_LENGTH);
+    rq->id[0] = '0';
     rq->lock = 0;
 
 }

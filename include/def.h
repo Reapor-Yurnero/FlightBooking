@@ -6,6 +6,8 @@
 #define MAXLINE         1024
 #define IP_LENGTH       16
 #define ARG_LENGTH      40
+#define MAX_TOKEN       10
+#define MAX_INT_LENGTH  10
 
 #define spin_lock_t int 
 
