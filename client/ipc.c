@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <sys/time.h>
 #include "requestor.h"
 #include "ipc.h"
 
@@ -20,6 +21,17 @@ int ipc_rx(struct requestor* rq, char* recv){
                  MSG_WAITALL, (struct sockaddr *) rq->servaddr,
                  &len);
     
+    recv[n] = '\0';
+}
+
+int ipc_rx_wait(struct requestor* rq, char* recv, int timeout){
+    int n, len;
+    struct timeval tv = {timeout, 0};
+    setsockopt(rq->sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(struct timeval));
+    n = recvfrom(rq->sockfd, (char *)recv, MAXLINE,
+                 MSG_WAITALL, (struct sockaddr *) rq->servaddr,
+                 &len);
+
     recv[n] = '\0';
 }
 
