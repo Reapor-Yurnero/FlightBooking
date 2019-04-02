@@ -1,6 +1,7 @@
 import socket  # for sockets
 import sys  # for exit
 import time  # for duration
+import json
 
 HOST = ''
 PORT = 7777
@@ -21,6 +22,14 @@ class Server:
         # bookingdb: Dic[Name][flightID] -> quantity of flightID booked by Name
         self.bookingdb = {"Jordan": {"MU110": 3},
                           "Kobe": {"MU110": 10, "HU201": 3}}
+
+        try:
+            fp1 = open("flights.json", 'r')
+            fp2 = open('booking.json', 'r')
+            self.flightdb = json.load(fp1)
+            self.bookingdb = json.load(fp2)
+        except FileNotFoundError as e:
+            print("No input databases, using the default one now")
 
         # request history {(requestorname,requestID):result} result is byte array or None
         self.requesthistory = {}
@@ -344,6 +353,13 @@ class Server:
                         sys.exit()
                 s.settimeout(None)
 
+    def dumpjson(self):
+        with open('dump_flights.json','w') as fp:
+            json.dump(self.flightdb, fp)
+
+        with open('dump_booking.json','w') as fp:
+            json.dump(self.bookingdb, fp)
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == 'False':
@@ -351,4 +367,7 @@ if __name__ == '__main__':
         print("Manually chose udp reliability: {:s}".format(sys.argv[1]))
     else:
         aServer = Server()
-    aServer.start()
+    try:
+        aServer.start()
+    finally:
+        aServer.dumpjson()
