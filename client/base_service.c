@@ -138,30 +138,34 @@ static int base_s4(struct requestor* rq){
 
     ipc_disperse(tokens,buffer);
 
-    clock_t start, diff;
-    int ntime, sec;
+    time_t start, diff;
+    time_t ntime;
     char reply[MAXLINE];
+    int ret;
     
-    start = clock();
+    start = time(NULL);
+    diff = 0;
 
     if(!strcmp(tokens[1],"0")){
         printf("Monitor rejected: no such flight!\n");
     }
     else{
         printf("Start monitoring...\n");
-        ntime = atoi(tokens[2]);
-        while ( sec < ntime ){
-            diff=clock()-start;
-            sec=diff/CLOCKS_PER_SEC;
+        ntime = atol(tokens[2]);
+        while ( diff < ntime ){
+            diff=time(NULL)-start;
 
-            ipc_rx(rq, buffer);
-            ipc_disperse(tokens, buffer);
-            printf("%s\n",tokens[1]);
+            ret = ipc_rx_wait(rq, buffer, 1);
+            if(ret>=0){
+                /* ipc receive succeeded */
+                ipc_disperse(tokens, buffer);
+                printf("%s\n",tokens[1]);
 
-            memset(msg, 0, MAXLINE);
-            sprintf(reply,"Callback received by %s",rq->name);
-            ipc_concat(2,msg,"1",reply);
-            ipc_tx(rq, msg);
+                memset(msg, 0, MAXLINE);
+                sprintf(reply,"Callback received by %s",rq->name);
+                ipc_concat(2,msg,"1",reply);
+                ipc_tx(rq, msg);
+            }
         }
     }
     

@@ -31,8 +31,12 @@ int ipc_rx_wait(struct requestor* rq, char* recv, int timeout){
     n = recvfrom(rq->sockfd, (char *)recv, MAXLINE,
                  MSG_WAITALL, (struct sockaddr *) rq->servaddr,
                  &len);
-
+    if(n<0){
+        return -1;
+        // printf("ipc timeout!\n");
+    }
     recv[n] = '\0';
+    return 0;
 }
 
 char* ipc_cat(char* dest, const char* src){
