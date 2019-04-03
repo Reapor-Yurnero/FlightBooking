@@ -6,16 +6,48 @@ Demo: slot 10, 13:15 - 13:30
 
 ## Introduction & Get Started
 
-This is a flight booking system which allows user to search, enquire, book/cancel, monitor flights and review orders.
+This is a flight booking system which allows user to search, enquire, book/cancel, monitor flights and review orders. It contains a server app and a client app.
 
-Basically it contains a server part and a client part.
-
-For Server part: run
+For server part:
 ```
-python3 server.py False
+python3 server.py [isUDPReliable]
 ```
+When the optional execution argument isUDPReliable specifying as `False`, the server will run in a udp unreliable mode (*at least once semantic*).
+ 
+For client part:
+```
+python3 client.py [server address] [server port]
+```
+The arguments `server address` and `server port` are optional and by default set to ('localhost',2222)
 
-## Overall Stucture Design
+## Demo Script
+
+1. Start up the server on an arbitrary computer in the lab
+2. Start up three clients on several other computers
+3. Work on client 1 and test all services except monitor
+    * Test the find flight service
+        - Shanghai -> Beijing
+        - Shanghai -> Nanjing (no such flight)
+    * Test the check flight info service
+        - MU110
+        - MU123 (no such flight)
+    * Test the book flight service
+        - MU110 3
+        - MU123 3 (no such flight)
+        - MU110 20 (not enough vacacies)
+    * Test the check order service
+    * Test the cancel flight service
+        - MU110 1
+        - check order
+        - MU110 3 (not enough orders)
+        - MU123 2 (no such flight)
+4. Test the monitor service with client 2 and client 3
+    * Client 2 monitor HU222 (no such flight)
+    * Client 2 monitor HU201 and client 3 monitor MU110
+    * Client 1 book/cancel flights of HU201 and MU110
+    * After the monitor interval ends, test arbitrarily any services
+
+## Overall Structure Design
 
 The flightbooking system is implemented in a **client-server** structure. 
 

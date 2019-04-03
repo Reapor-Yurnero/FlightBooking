@@ -4,7 +4,7 @@ import time  # for duration
 import json
 
 HOST = ''
-PORT = 7777
+PORT = 2222
 
 
 class Server:

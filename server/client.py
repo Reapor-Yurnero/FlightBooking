@@ -2,7 +2,7 @@ import socket  # for sockets
 import sys  # for exit
 import time  # for duration
 
-SERVERADDR = ('localhost', 7777)  # modify this when necessary, currently applicable to local test
+SERVERADDR = ('localhost', 2222)  # modify this when necessary, currently applicable to local test
 
 
 class Client:
