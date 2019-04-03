@@ -13,9 +13,16 @@ struct serv ser = {
 int main() {
 
     int sn=1;
+    int port = 3333;
+    char name[MAX_REQUESTOR_NAME] = "test1";
+    
+    printf("Port you want to use on this machine: ");
+    scanf("%d",&port);
+    printf("Type in your name: ");
+    scanf("%s",name);
 
     init_service(&ser);
-    init_requestor(&rq1,"test1",8088,"127.0.0.1");
+    init_requestor(&rq1,name,port,"127.0.0.1");
 
     while(1){
         printf("Welcome %s! Select a service:\n",rq1.name);
