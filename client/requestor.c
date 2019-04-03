@@ -16,7 +16,7 @@ char* id_plus(struct requestor* rq, int num){
 }
 
 int init_requestor(struct requestor *rq, const char* name,
-                    int port, const char* ip){
+                    int port, const char* ip, char* serip){
 
     rq->name = malloc( sizeof(char) * MAX_REQUESTOR_NAME);
     strcpy(rq->name, name);
@@ -37,7 +37,7 @@ int init_requestor(struct requestor *rq, const char* name,
     /* set to default */
     rq->servaddr->sin_family = AF_INET;  // IPv4
     rq->servaddr->sin_port = htons(DEF_SERVER_PORT);
-    rq->servaddr->sin_addr.s_addr = inet_addr("127.0.0.1");
+    rq->servaddr->sin_addr.s_addr = inet_addr(serip);
 
     /* set to default */
     rq->cliaddr->sin_family = AF_INET;
