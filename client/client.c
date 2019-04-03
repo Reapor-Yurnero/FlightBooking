@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "def.h"
 #include "service.h"
 #include "requestor.h"
@@ -10,19 +12,30 @@ struct serv ser = {
     .ops = &base_serv_ops,
 };
 
-int main() {
+int main(int argc, char *argv[]) {
 
-    int sn=1;
-    int port = 3333;
-    char name[MAX_REQUESTOR_NAME] = "test1";
+    int sn, port;
+    sn=0;
+    char name[MAX_REQUESTOR_NAME]="test1";
+    char serip[IP_LENGTH]="127.0.0.1";
     
-    printf("Port you want to use on this machine: ");
-    scanf("%d",&port);
-    printf("Type in your name: ");
-    scanf("%s",name);
+    if(argc>2){
+        strcpy(name,argv[1]);
+        port=atoi(argv[2]);
+    }
+    else{
+        printf("Port you want to use on this machine: ");
+        if(scanf("%d",&port)==0) return 1;
+        printf("Type in your name: ");
+        scanf("%s",name);
+    }
+
+    if(argc==4){
+        strcpy(serip,argv[3]);
+    }
 
     init_service(&ser);
-    init_requestor(&rq1,name,port,"127.0.0.1");
+    init_requestor(&rq1,name,port,"127.0.0.1",serip);
 
     while(1){
         printf("Welcome %s! Select a service:\n",rq1.name);
@@ -32,8 +45,14 @@ int main() {
         printf("4. Monitor a flight.\n");
         printf("5. Check order information.\n");
         printf("6. Cancel ordered tickets\n");
+
+
+getservnum:
         printf("Type in the service you want (number 1-7): ");
-        scanf("%d", &sn);
+        if(scanf("%d",&sn)==0) break;
+        if(sn>7 || sn<1) goto getservnum;
+
+
         ser.call_service(sn,&rq1);
     }
 
