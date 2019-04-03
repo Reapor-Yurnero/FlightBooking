@@ -4,32 +4,28 @@
 #include <time.h>
 #include "service.h"
 #include "ipc.h"
+#include "msg.h"
 
-static int base_s1(struct requestor* rq){
+static int base_s1(struct requestor* rq, struct message* m){
 
-    char msg[MAXLINE];
-    char buffer[MAXLINE];
     char arg1[ARG_LENGTH];
     char arg2[ARG_LENGTH];
-    char* tokens[MAX_TOKEN];
-
-    memset(msg, 0, MAXLINE);
-    memset(buffer, 0, MAXLINE);
+    char** tokens = m->tokens;
 
     printf("Source city: ");
     scanf("%s",arg1);
     printf("Destination city: ");
     scanf("%s",arg2);
 
-    ipc_concat(6,msg,"0",rq->name,id_plus(rq,1),"1",arg1,arg2);
+    ipc_concat(6,m->send,"0",rq->name,id_plus(rq,1),"1",arg1,arg2);
 
-    ipc_tx(rq, msg);
-    ipc_rx(rq, buffer);
+    ipc_tx(rq, m->send);
+    ipc_rx(rq, m->recv);
 
-    int num = ipc_disperse(tokens,buffer);
+    int num = ipc_disperse(tokens,m->recv);
     if( num > 2 ){
         printf("There is(are) %d flight(s) applicable:\n",num-2);
-        for(int i=2; i<num; i++)printf("%s\n",tokens[i]);
+        for(int i=2; i<num; i++)printf("%s\n",m->tokens[i]);
     }
     else{
         printf("There is no flight applicable\n");
@@ -38,24 +34,20 @@ static int base_s1(struct requestor* rq){
     return 0;
 }
 
-static int base_s2(struct requestor* rq){
-    char msg[MAXLINE];
-    char buffer[MAXLINE];
-    char arg1[ARG_LENGTH];
-    char* tokens[MAX_TOKEN];
+static int base_s2(struct requestor* rq, struct message* m){
 
-    memset(msg, 0, MAXLINE);
-    memset(buffer, 0, MAXLINE);
+    char arg1[ARG_LENGTH];
+    char** tokens = m->tokens;
 
     printf("Flight number you want to enquire: ");
     scanf("%s",arg1);
 
-    ipc_concat(5,msg,"0",rq->name,id_plus(rq,1),"2",arg1);
+    ipc_concat(5,m->send,"0",rq->name,id_plus(rq,1),"2",arg1);
 
-    ipc_tx(rq, msg);
-    ipc_rx(rq, buffer);
+    ipc_tx(rq, m->send);
+    ipc_rx(rq, m->recv);
 
-    ipc_disperse(tokens,buffer);
+    ipc_disperse(tokens,m->recv);
 
     char stime[10];
     if(!strcmp(tokens[1],"0")){
@@ -72,15 +64,11 @@ static int base_s2(struct requestor* rq){
     return 0;
 }
 
-static int base_s3(struct requestor* rq){
-    char msg[MAXLINE];
-    char buffer[MAXLINE];
+static int base_s3(struct requestor* rq, struct message* m){
+
     char arg1[ARG_LENGTH];
     char arg2[ARG_LENGTH];
-    char* tokens[MAX_TOKEN];
-
-    memset(msg, 0, MAXLINE);
-    memset(buffer, 0, MAXLINE);
+    char** tokens = m->tokens;
 
     printf("Flight number you want to book: ");
     scanf("%s",arg1);
@@ -88,12 +76,12 @@ static int base_s3(struct requestor* rq){
     /* need check here */
     scanf("%s",arg2);
 
-    ipc_concat(6,msg,"0",rq->name,id_plus(rq,1),"3",arg1,arg2);
+    ipc_concat(6,m->send,"0",rq->name,id_plus(rq,1),"3",arg1,arg2);
 
-    ipc_tx(rq, msg);
-    ipc_rx(rq, buffer);
+    ipc_tx(rq, m->send);
+    ipc_rx(rq, m->recv);
 
-    ipc_disperse(tokens,buffer);
+    ipc_disperse(tokens,m->recv);
 
     switch (*tokens[1])
     {
@@ -115,15 +103,11 @@ static int base_s3(struct requestor* rq){
 }
 
 
-static int base_s4(struct requestor* rq){
-    char msg[MAXLINE];
-    char buffer[MAXLINE];
+static int base_s4(struct requestor* rq, struct message* m){
+
     char arg1[ARG_LENGTH];
     char arg2[ARG_LENGTH];
-    char* tokens[MAX_TOKEN];
-
-    memset(msg, 0, MAXLINE);
-    memset(buffer, 0, MAXLINE);
+    char** tokens = m->tokens;
 
     printf("Flight number you want to monitor: ");
     scanf("%s",arg1);
@@ -131,12 +115,12 @@ static int base_s4(struct requestor* rq){
     /* need check here */
     scanf("%s",arg2);
 
-    ipc_concat(6,msg,"0",rq->name,id_plus(rq,1),"4",arg1,arg2);
+    ipc_concat(6,m->send,"0",rq->name,id_plus(rq,1),"4",arg1,arg2);
 
-    ipc_tx(rq, msg);
-    ipc_rx(rq, buffer);
+    ipc_tx(rq, m->send);
+    ipc_rx(rq, m->recv);
 
-    ipc_disperse(tokens,buffer);
+    ipc_disperse(tokens,m->recv);
 
     time_t start, diff;
     time_t ntime;
@@ -155,16 +139,16 @@ static int base_s4(struct requestor* rq){
         while ( diff < ntime ){
             diff=time(NULL)-start;
 
-            ret = ipc_rx_wait(rq, buffer, 1);
+            ret = ipc_rx_wait(rq, m->recv, 1);
             if(ret>=0){
                 /* ipc receive succeeded */
-                ipc_disperse(tokens, buffer);
+                ipc_disperse(tokens, m->recv);
                 printf("%s\n",tokens[1]);
 
-                memset(msg, 0, MAXLINE);
+                memset(m->send, 0, MAXLINE);
                 sprintf(reply,"Callback received by %s",rq->name);
-                ipc_concat(2,msg,"1",reply);
-                ipc_tx(rq, msg);
+                ipc_concat(2,m->send,"1",reply);
+                ipc_tx(rq, m->send);
             }
         }
     }
@@ -173,22 +157,17 @@ static int base_s4(struct requestor* rq){
 }
 
 
-static int base_s5(struct requestor* rq){
-    char msg[MAXLINE];
-    char buffer[MAXLINE];
-    char* tokens[MAX_TOKEN];
+static int base_s5(struct requestor* rq, struct message* m){
 
-    memset(msg, 0, MAXLINE);
-    memset(buffer, 0, MAXLINE);
-
+    char** tokens = m->tokens;
     printf("wait a second, proceeding...\t");
 
-    ipc_concat(4,msg,"0",rq->name,id_plus(rq,1),"5");
+    ipc_concat(4,m->send,"0",rq->name,id_plus(rq,1),"5");
 
-    ipc_tx(rq, msg);
-    ipc_rx(rq, buffer);
+    ipc_tx(rq, m->send);
+    ipc_rx(rq, m->recv);
 
-    int num = ipc_disperse(tokens,buffer);
+    int num = ipc_disperse(tokens,m->recv);
 
     printf("You have booked %s flight ticket(s) in all:\n",tokens[1]);
 
@@ -202,15 +181,11 @@ static int base_s5(struct requestor* rq){
 }
 
 
-static int base_s6(struct requestor* rq){
-    char msg[MAXLINE];
-    char buffer[MAXLINE];
+static int base_s6(struct requestor* rq, struct message* m){
+
     char arg1[ARG_LENGTH];
     char arg2[ARG_LENGTH];
-    char* tokens[MAX_TOKEN];
-
-    memset(msg, 0, MAXLINE);
-    memset(buffer, 0, MAXLINE);
+    char** tokens = m->tokens;
 
     printf("Flight number you want to cancel: ");
     scanf("%s",arg1);
@@ -218,12 +193,12 @@ static int base_s6(struct requestor* rq){
     /* need check here */
     scanf("%s",arg2);
 
-    ipc_concat(6,msg,"0",rq->name,id_plus(rq,1),"6",arg1,arg2);
+    ipc_concat(6,m->send,"0",rq->name,id_plus(rq,1),"6",arg1,arg2);
 
-    ipc_tx(rq, msg);
-    ipc_rx(rq, buffer);
+    ipc_tx(rq, m->send);
+    ipc_rx(rq, m->recv);
 
-    ipc_disperse(tokens,buffer);
+    ipc_disperse(tokens,m->recv);
 
     switch (*tokens[1])
     {
@@ -257,31 +232,40 @@ static int base_call(int sn, struct requestor* rq){
 
     const struct serv_ops* ops = &base_serv_ops;
 
+    struct message m;
+    init_msg(&m);
+
     switch (sn)
     {
         case SER_FIND:
-            base_s1(rq);
+            base_s1(rq,&m);
             break;
         case SER_GETDETAIL:
-            base_s2(rq);
+            base_s2(rq,&m);
             break;
         case SER_BOOK:
-            base_s3(rq);
+            base_s3(rq,&m);
             break;
         case SER_MONITOR:
-            base_s4(rq);
+            base_s4(rq,&m);
             break;
         case SER_ORDERINFO:
-            base_s5(rq);
+            base_s5(rq,&m);
             break;
         case SER_CANCEL:
-            base_s6(rq);
+            base_s6(rq,&m);
             break;
         case SER_EXIT:
             break;
         default:
             break;
     }
+
+    clean_msg(&m);
+    ipc_concat(4,m.send,"3",rq->name,rq->id,"0");
+    ipc_tx(rq,m.send);
+
+    free_msg(&m);
 
     return 0;
 }

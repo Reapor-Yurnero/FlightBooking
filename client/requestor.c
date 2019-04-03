@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <errno.h>
+#include <time.h>
 #include "requestor.h"
 
 char* id_plus(struct requestor* rq, int num){
@@ -25,7 +25,7 @@ int init_requestor(struct requestor *rq, const char* name,
     // Creating socket file descriptor
     if ( (rq->sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
         perror("socket creation failed");
-        return -EBADFD;
+        return -1;
     }
 
     rq->servaddr = malloc( sizeof(struct sockaddr_in) );
@@ -51,11 +51,12 @@ int init_requestor(struct requestor *rq, const char* name,
         perror("Bind failed");
         free(rq->servaddr);
         free(rq->cliaddr);
-        return -EHOSTUNREACH;
+        return -1;
     }
 
     memset(rq->id, 0, MAX_INT_LENGTH);
     rq->id[0] = '0';
+    id_plus(rq,(int)time(NULL));
     rq->lock = 0;
 
 }

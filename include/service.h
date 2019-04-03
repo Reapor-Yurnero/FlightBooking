@@ -3,6 +3,7 @@
 
 #include "def.h"
 #include "requestor.h"
+#include "msg.h"
 
 #define SER_FIND        1
 #define SER_GETDETAIL   2
@@ -19,13 +20,13 @@ struct serv_ops {
         all of them should be returned to the user. If no flight matches the source and
         destination places, an error message should be returned.
     */
-    int (*s1)(struct requestor* rq);
+    int (*s1)(struct requestor* rq, struct message* m);
 
     /*  A service that allows a user to query the departure time, airfare and seat
         availability by specifying the flight identifier. If the flight with the requested identifier
         does not exist, an error message should be returned.
     */
-    int (*s2)(struct requestor* rq);
+    int (*s2)(struct requestor* rq, struct message* m);
 
     /*  A service that allows a user to make seat reservation on a flight by specifying the
     flight identifier and the number of seats to reserve. On successful reservation, an
@@ -34,7 +35,7 @@ struct serv_ops {
     flight identifier or insufficient number of available seats), a proper error message
     should be returned.
     */
-    int (*s3)(struct requestor* rq);
+    int (*s3)(struct requestor* rq, struct message* m);
 
     /*  A service that allows a user to monitor updates made to the seat availability
     information of a flight at the server through callback for a designated time period
@@ -52,15 +53,15 @@ struct serv_ops {
     client. However, your implementation should allow multiple clients to monitor
     updates to the flights concurrently.
     */
-    int (*s4)(struct requestor* rq);
+    int (*s4)(struct requestor* rq, struct message* m);
 
     /*  In addition to the above services, you are required design and implement two
     more operations on the flights through client-server communication. One of
     them should be idempotent and the other should be non-idempotent. Describe
     your design in the report.
     */
-    int (*s5)(struct requestor* rq);
-    int (*s6)(struct requestor* rq);
+    int (*s5)(struct requestor* rq, struct message* m);
+    int (*s6)(struct requestor* rq, struct message* m);
 
 };
 

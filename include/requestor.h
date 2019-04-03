@@ -9,7 +9,7 @@
 
 struct requestor {
     char* name;
-    char id[10];
+    char id[MAX_INT_LENGTH];
 
     int sockfd;
     struct sockaddr_in* servaddr;
