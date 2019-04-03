@@ -1,21 +1,34 @@
 # FlightBooking
 
 Author: Xiaohan Fu
+
 Demo: slot 10, 13:15 - 13:30
+
+## Introduction & Get Started
+
+This is a flight booking system which allows user to search, enquire, book/cancel, monitor flights and review orders.
+
+Basically it contains a server part and a client part.
+
+For Server part: run
+```
+python3 server.py False
+```
 
 ## Overall Stucture Design
 
-The flightbooking system is implemented in a client-server structure. 
+The flightbooking system is implemented in a **client-server** structure. 
 
-THe client app is responsible for the interaction with users, including reading the requested service, corresponding arguments and outputing the consequent result.
+The client app is responsible for the interaction with users, including reading in the requested service and arguments from the text interface and outputing/displaying the consequent result to users.
 
-The server is responsible for the execution of services, management of database and supply of the result.
+The server is responsible for the execution of services, management of database and generation of the result.
 
 Our whole system is illustrated in the following graph (TODO).
 
+In the following subsections, I will develop
 ### Database Structure
 
-The database is actually a runtime dictionray stored as a private dictionary inside the server. It's designed to be super intuitive: the Key of the dict is just the idenntifier of the flightNO, the correponding Value is another dict which contains all information relevant. "Details" is a three element array which is repectively the departure time (int), airfare (float) and vacancy (int). The departure hour:minute data can be decoded by dividing the int value with 100 and obtain its quotient and remainder. The airfare and vacancy are straightforward.
+The database is actually a runtime dictionary stored as a private dictionary inside the server. It's designed to be super intuitive: the Key of the dict is just the idenntifier of the flightNO, the correponding Value is another dict which contains all information relevant. "Details" is a three element array which is repectively the departure time (int), airfare (float) and vacancy (int). The departure hour:minute data can be decoded by dividing the int value with 100 and obtain its quotient and remainder. The airfare and vacancy are straightforward.
 
 Example:
 
