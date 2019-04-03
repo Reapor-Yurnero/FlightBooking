@@ -14,28 +14,23 @@ struct serv ser = {
 
 int main(int argc, char *argv[]) {
 
-    int sn, port;
+    int sn, myport;
     sn=0;
     char name[MAX_REQUESTOR_NAME]="test1";
     char serip[IP_LENGTH]="127.0.0.1";
+    char myip[IP_LENGTH]="0.0.0.0";
     
-    if(argc>2){
-        strcpy(name,argv[1]);
-        port=atoi(argv[2]);
-    }
-    else{
-        printf("Port you want to use on this machine: ");
-        if(scanf("%d",&port)==0) return 1;
-        printf("Type in your name: ");
-        scanf("%s",name);
+    if(argc>1){
+        strcpy(serip,argv[1]);
     }
 
-    if(argc==4){
-        strcpy(serip,argv[3]);
-    }
+    printf("Port you want to use on this machine: ");
+    if(scanf("%d",&myport)==0) return 1;
+    printf("Type in your name: ");
+    scanf("%s",name);
 
     init_service(&ser);
-    init_requestor(&rq1,name,port,"127.0.0.1",serip);
+    init_requestor(&rq1,name,myport,myip,serip);
 
     while(1){
         printf("Welcome %s! Select a service:\n",rq1.name);
@@ -45,13 +40,13 @@ int main(int argc, char *argv[]) {
         printf("4. Monitor a flight.\n");
         printf("5. Check order information.\n");
         printf("6. Cancel ordered tickets\n");
-
+        printf("7: Exit\n");
 
 getservnum:
         printf("Type in the service you want (number 1-7): ");
         if(scanf("%d",&sn)==0) break;
+        if(sn==7) break;
         if(sn>7 || sn<1) goto getservnum;
-
 
         ser.call_service(sn,&rq1);
     }
