@@ -54,11 +54,13 @@ static int base_s2(struct requestor* rq, struct message* m){
         printf("No such flight!\n"); 
     }
     else{
-        strcpy(stime,tokens[2]);
-        stime[2]=':';
-        strcpy(stime+3,tokens[2]+2);
-        printf("Flight will depart at %s, with airfare %s and %s vacancies\n",
-            stime,tokens[3],tokens[4]);
+        int hour=atoi(tokens[2])/100;
+        int min = atoi(tokens[2])%100;
+        //strcpy(stime,tokens[2]);
+        //stime[2]=':';
+       // strcpy(stime+3,tokens[2]+2);
+        printf("Flight will depart at %02d:%02d, with airfare %s and %s vacancies\n",
+            hour,min,tokens[3],tokens[4]);
     }
     
     return 0;

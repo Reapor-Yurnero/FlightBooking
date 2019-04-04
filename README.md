@@ -19,17 +19,24 @@ should be returned.
 
 ## Get Started
 
-For server part:
+server:
 ```
 python3 server.py [isUDPReliable]
 ```
 When the optional execution argument `isUDPReliable` is specified to be `False`, the server will run in a udp unreliable mode (*at least once semantic*).
- 
-For client part:
+
+python client
 ```
 python3 client.py [server_address] [server_port]
 ```
-The arguments `server_address` and `server_port` are optional and by default set to ('localhost', 2222)
+c client
+```
+make
+./client.exe [server_address] [server_port]
+```
+The arguments `server_address` and `server_port` are optional (but they must appear together) and by default set to ('localhost', 2222)
+
+*Note: the python client is more fault tolerent than the c client for wrong input. In either case, we expect the user to type in correct
 
 ## Demo Script
 
