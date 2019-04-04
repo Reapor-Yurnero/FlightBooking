@@ -68,7 +68,17 @@ The client app is responsible for the interaction with users, including reading 
 
 The server is responsible for the execution of services, management of database and generation of the result.
 
-Our whole system is illustrated in the following graph (TODO).
+A complete circle (if no fault occurs) is:
+
+* Client reads input from user
+* Client marshalls the inputs into bytecode and sends to server by udp
+* Server receives the bytecode and unmarshalls it
+* Server calls the corresponding function
+* Server marshalls the result into bytecode and sends back to client by udp
+* Client receives the bytecode and sends an acknowledgement to server
+* Client unmarshalls the result and displays the output to user
+
+The callback(monitor) is a little bit different. You may refer to later sections on callback and fault-tolerent measures.
 
 ### Database Structure
 
@@ -78,7 +88,7 @@ The database can be loaded before the server starts from files under same path n
 
 ```python
 # flightdb: Dic[flightID] -> details: departuretime, airfare, availibity, src, dest
-self.flightdb = \
+flightdb = \
     {
         "MU110": {"details": [1800, 1000.3, 10], "src": "Shanghai", "dest": "Beijing", "modified": False},
         "HU201": {"details": [1405, 600.2, 16], "src": "Singapore", "dest": "Bali", "modified": False},
@@ -86,13 +96,13 @@ self.flightdb = \
     }
 
 # bookingdb: Dic[Name][flightID] -> quantity of flightID booked by Name
-self.bookingdb = {"Jordan": {"MU110": 3},
+bookingdb = {"Jordan": {"MU110": 3},
                     "Kobe": {"MU110": 10, "HU201": 3}}
 ```
 
 On exit, server will save the updated database into `dump_flights.json` and `dump_booking.json`.
 
-### Communication Message
+### Message Format
 
 The general design logic is: everything is a string. So basically all kinds of data structures are marshalled exactly in the same way as string after they are transformed into a string. 
 
@@ -108,7 +118,7 @@ No matter what kind of message it is, it should begin with the messageType infor
 
 The following are the details of each messageType.
 
-#### Request Format:
+#### Request Format
 
 A general request format features the following pattern:
 `char(1)string(messageType)char(len(requestorname))string(requestorname)char(len(requestID))string(requestID)char(requestType)string(requestType)...parameters`
@@ -122,7 +132,7 @@ e.g. a valid request bytecode sent by client: `b'\x010\x06Jordan\x0213\x014\x05M
 
 which maps: messageType = 0, requestorname = Jordan, requestID = 13, requestType = 4, parameters: MU110, 30
 
-#### Reply Format:
+#### Reply Format
 
 The server reply byte code format is similar to the one of request except we remove the requesterName, requestID and requestType which can be easily obtained by client itself and we replace the parameters with outputs in same fashion.
 
@@ -203,7 +213,7 @@ Basically, we are using the `at most once` semantic for client -> server communi
 2. duplicate filtering
 3. retransmit reply
 
-### Retransimit Request Message
+### Retransmit Request Message
 
 A timeout period 1 second is set for the socket. If a transmit ommission occurs at any period of the communication, either a missed request, or a missed reply, the client will retransimit the exactly same request repeated until a reply from server is received. 
 
@@ -217,7 +227,7 @@ To solve the problem of infinitely growing history list size, we ask the client 
 
 ## Experiment on At-least-one and At-most-one Semantics
 
-We test the difference behavior of at-least-one semantic and at-most-once semantic on same scripts for non-idempotent and idempotent case respectively.
+We test the difference behavior of at-least-one semantic and at-most-once semantic on same scripts for non-idempotent and idempotent case respectively. We simulate the case that a transmit omission happens such that the request is resent by the client.
 
 Non-idempotent:
 ```python
@@ -361,7 +371,7 @@ bookingdb = \
     }
 ```
 
-#### Idenpotent script
+#### Idempotent script
 
 Final db result:
 ```python
