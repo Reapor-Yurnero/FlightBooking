@@ -1,12 +1,16 @@
 # FlightBooking
 
-Author: Xiaohan Fu
+Xiaohan Fu
 
 Demo: slot 10, 13:15 - 13:30
 
+[TOC]
+
 ## Introduction
 
-This is a flight booking system which allows user to search, enquire, book/**cancel**, **monitor** flights and review orders. It contains a server app and a client app.
+This is a flight booking system which allows user to search, enquire, book/cancel, monitor flights and review orders. It contains a server app and a client app.
+
+About the two add-on services:
 
 * Cancel flight is a service that allows a user to make seat cancelation on a flight by specifying the
 flight identifier and the number of seats to cancel. On successful reservation, an
@@ -36,7 +40,7 @@ make
 ```
 The arguments `server_address` and `server_port` are optional (but they must appear together) and by default set to ('localhost', 2222)
 
-*Note: the python client is more fault tolerent than the c client for wrong input. In either case, we expect the user to type in correct
+*Note: the python client is more fault tolerent than the c client for wrong inputs (e.g. the user typed in a string when an int is expected). But anyway, we expect the user to interact correctly. The behavior of python and c client may also have some slight difference.*
 
 ## Demo Script
 
@@ -71,9 +75,9 @@ You may follow the script to perform tests on the system.
 
 The flightbooking system is implemented in a **client-server** structure. 
 
-The client app is responsible for the interaction with users, including reading in the requested service and arguments from the text interface and outputing/displaying the consequent result to users.
+The client app is a combination of a client front-end and server interface. It's responsible for the interaction with users, including reading in the requested service and arguments from the text interface and outputing/displaying the consequent result to users as a front-end as well as the transmission and marshalling of service request to the server as the interface.
 
-The server is responsible for the execution of services, management of database and generation of the result.
+The server app is a combination of the server back-end and skeleton. It's responsible for the execution of services, management of database and generation of the result as back-end and also unmarshalling the request received and calling the service functions as a skeleton.
 
 A complete circle (if no fault occurs) is:
 
@@ -232,9 +236,9 @@ Each time when the server receives a request, it will first look up the requeste
 
 To solve the problem of infinitely growing history list size, we ask the client to send an acknowledgement on receiving the result from server. The server will delete the corresponding request in request history consequently. However, this is an optional requirement. Even if the acknowledgement is missing or the client does not send a ack, everything still works fine. This is designed in terms of flexibility and efficiency. As a result, we don't need any fault tolerence measure to ensure the reliability of acknowledgement transimission.
 
-## Experiment on At-least-one and At-most-one Semantics
+## Experiment on At-least-once and At-most-once Semantics
 
-We test the difference behavior of at-least-one semantic and at-most-once semantic on same scripts for non-idempotent and idempotent case respectively. We simulate the case that a transmit omission happens such that the request is resent by the client.
+We test the difference behavior of at-least-once semantic and at-most-once semantic on same scripts for non-idempotent and idempotent case respectively. We simulate the case that a transmit omission happens such that the request is resent by the client.
 
 Non-idempotent:
 ```python
@@ -278,7 +282,7 @@ blist.append(bytes(chr(len(str(0))) + str(0) + chr(len('James')) + 'James' + chr
     len(str(5))) + str(5), 'utf-8'))
 ```
 
-### At-least-one Semantics
+### At-least-once Semantics
 
 Execution settings of server:
 ```
@@ -401,5 +405,10 @@ The at-most-once semantics works properly for both non-idempotent and idempotent
  while at-least-once only works properly for idempotent operations and will lead to wrong answer on non-idempotent case.
 
 
+## Potential Updates in Future
+
+* Login system which binds username with a password (may implement some interesting crypoto algos)
+* A standalone remote database server with mongodb or sql which can be updated real-timely
+* A GUI (may practice with qt gui design)
 
 
