@@ -19,9 +19,11 @@ int main(int argc, char *argv[]) {
     char name[MAX_REQUESTOR_NAME]="test1";
     char serip[IP_LENGTH]="127.0.0.1";
     char myip[IP_LENGTH]="0.0.0.0";
+    int serport = 2222;
     
     if(argc>1){
         strcpy(serip,argv[1]);
+        serport = atoi(argv[2]);
     }
 
     printf("Port you want to use on this machine: ");
@@ -30,7 +32,7 @@ int main(int argc, char *argv[]) {
     scanf("%s",name);
 
     init_service(&ser);
-    init_requestor(&rq1,name,myport,myip,serip);
+    init_requestor(&rq1,name,myport,myip,serip,serport);
 
     while(1){
         printf("Welcome %s! Select a service:\n",rq1.name);
@@ -49,6 +51,8 @@ getservnum:
         if(sn>7 || sn<1) goto getservnum;
 
         ser.call_service(sn,&rq1);
+        printf("Press Return to go back to main menu...");
+        getchar();getchar();
     }
 
     free_requestor(&rq1);

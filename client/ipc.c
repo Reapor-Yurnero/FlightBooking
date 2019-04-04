@@ -9,7 +9,7 @@
 int ipc_tx(struct requestor* rq, const char* msg){
     
     sendto(rq->sockfd, (const char *)msg, strlen(msg),
-           MSG_DONTROUTE, (const struct sockaddr *) rq->servaddr,
+           0, (const struct sockaddr *) rq->servaddr,
            sizeof(struct sockaddr) );
 
     return 0;

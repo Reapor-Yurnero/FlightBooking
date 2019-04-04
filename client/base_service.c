@@ -175,8 +175,7 @@ static int base_s5(struct requestor* rq, struct message* m){
     {
          printf("Flight: %s, Quantity: %s\n", tokens[i*2], tokens[i*2+1]);
     }
-    
-    
+
     return 0;
 }
 

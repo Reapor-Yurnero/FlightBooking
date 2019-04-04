@@ -21,7 +21,7 @@ struct requestor {
 extern char* id_plus(struct requestor* rq, int num);
 
 extern int init_requestor(struct requestor *rq, const char* name,
-                    int port, const char* ip, char* serip);
+                    int port, const char* ip, char* serip, int serport);
 
 extern int free_requestor(struct requestor *rq);
 
